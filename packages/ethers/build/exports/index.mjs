@@ -1,14 +1,14 @@
-export { aB as createWeb3Modal, aC as defaultConfig } from '../shared/ethers.CHKYrsmo.mjs';
+export { aC as createWeb3Modal, aD as defaultConfig } from '../shared/ethers.C0Y1ps1c.mjs';
 import 'valtio/vanilla/utils';
 import 'valtio/vanilla';
-import 'valtio/utils';
 import 'dayjs';
 import 'dayjs/locale/en.js';
 import 'dayjs/plugin/relativeTime.js';
 import 'dayjs/plugin/updateLocale.js';
 import 'bignumber.js';
+import 'valtio/utils';
 import 'qrcode';
-import 'node:buffer';
+import 'buffer';
 import 'zod';
 import 'events';
 import 'detect-browser';

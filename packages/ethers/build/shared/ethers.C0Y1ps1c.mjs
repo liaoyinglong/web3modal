@@ -1,13 +1,13 @@
 import { subscribeKey } from 'valtio/vanilla/utils';
 import { proxy, snapshot, subscribe, ref } from 'valtio/vanilla';
-import { subscribeKey as subscribeKey$1 } from 'valtio/utils';
 import dayjs from 'dayjs';
 import englishLocale from 'dayjs/locale/en.js';
 import relativeTime from 'dayjs/plugin/relativeTime.js';
 import updateLocale from 'dayjs/plugin/updateLocale.js';
 import BigNumber from 'bignumber.js';
+import { subscribeKey as subscribeKey$1 } from 'valtio/utils';
 import QRCodeUtil from 'qrcode';
-import { Buffer as Buffer$1 } from 'node:buffer';
+import { Buffer as Buffer$1 } from 'buffer';
 import { z as z$4 } from 'zod';
 import c$7, { EventEmitter } from 'events';
 import { detect } from 'detect-browser';
@@ -39,7 +39,7 @@ const ONRAMP_PROVIDERS = [
     url: ""
   }
 ];
-const ConstantsUtil$2 = {
+const ConstantsUtil$3 = {
   FOUR_MINUTES_MS: 24e4,
   TEN_SEC_MS: 1e4,
   ONE_SEC_MS: 1e3,
@@ -205,16 +205,16 @@ const CoreHelperUtil = {
     return true;
   },
   isPairingExpired(expiry) {
-    return expiry ? expiry - Date.now() <= ConstantsUtil$2.TEN_SEC_MS : true;
+    return expiry ? expiry - Date.now() <= ConstantsUtil$3.TEN_SEC_MS : true;
   },
   isAllowedRetry(lastRetry) {
-    return Date.now() - lastRetry >= ConstantsUtil$2.ONE_SEC_MS;
+    return Date.now() - lastRetry >= ConstantsUtil$3.ONE_SEC_MS;
   },
   copyToClopboard(text) {
     navigator.clipboard.writeText(text);
   },
   getPairingExpiry() {
-    return Date.now() + ConstantsUtil$2.FOUR_MINUTES_MS;
+    return Date.now() + ConstantsUtil$3.FOUR_MINUTES_MS;
   },
   getPlainAddress(caipAddress) {
     return caipAddress.split(":")[2];
@@ -316,7 +316,7 @@ const CoreHelperUtil = {
     try {
       const { timeZone } = new Intl.DateTimeFormat().resolvedOptions();
       const capTimeZone = timeZone.toUpperCase();
-      return ConstantsUtil$2.RESTRICTED_TIMEZONES.includes(capTimeZone);
+      return ConstantsUtil$3.RESTRICTED_TIMEZONES.includes(capTimeZone);
     } catch {
       return false;
     }
@@ -393,23 +393,33 @@ const CoreHelperUtil = {
   }
 };
 
+async function fetchData(...args) {
+  const response = await fetch(...args);
+  if (!response.ok) {
+    const err = new Error(`HTTP status code: ${response.status}`, {
+      cause: response
+    });
+    throw err;
+  }
+  return response;
+}
 class FetchUtil {
   constructor({ baseUrl }) {
     this.baseUrl = baseUrl;
   }
   async get({ headers, signal, ...args }) {
     const url = this.createUrl(args);
-    const response = await fetch(url, { method: "GET", headers, signal, cache: "no-cache" });
+    const response = await fetchData(url, { method: "GET", headers, signal, cache: "no-cache" });
     return response.json();
   }
   async getBlob({ headers, signal, ...args }) {
     const url = this.createUrl(args);
-    const response = await fetch(url, { method: "GET", headers, signal });
+    const response = await fetchData(url, { method: "GET", headers, signal });
     return response.blob();
   }
   async post({ body, headers, signal, ...args }) {
     const url = this.createUrl(args);
-    const response = await fetch(url, {
+    const response = await fetchData(url, {
       method: "POST",
       headers,
       body: body ? JSON.stringify(body) : void 0,
@@ -419,7 +429,7 @@ class FetchUtil {
   }
   async put({ body, headers, signal, ...args }) {
     const url = this.createUrl(args);
-    const response = await fetch(url, {
+    const response = await fetchData(url, {
       method: "PUT",
       headers,
       body: body ? JSON.stringify(body) : void 0,
@@ -429,7 +439,7 @@ class FetchUtil {
   }
   async delete({ body, headers, signal, ...args }) {
     const url = this.createUrl(args);
-    const response = await fetch(url, {
+    const response = await fetchData(url, {
       method: "DELETE",
       headers,
       body: body ? JSON.stringify(body) : void 0,
@@ -449,652 +459,6 @@ class FetchUtil {
     return url;
   }
 }
-
-const state$i = proxy({
-  projectId: "",
-  sdkType: "w3m",
-  sdkVersion: "html-wagmi-undefined"
-});
-const OptionsController = {
-  state: state$i,
-  subscribeKey(key, callback) {
-    return subscribeKey(state$i, key, callback);
-  },
-  setProjectId(projectId) {
-    state$i.projectId = projectId;
-  },
-  setAllWallets(allWallets) {
-    state$i.allWallets = allWallets;
-  },
-  setIncludeWalletIds(includeWalletIds) {
-    state$i.includeWalletIds = includeWalletIds;
-  },
-  setExcludeWalletIds(excludeWalletIds) {
-    state$i.excludeWalletIds = excludeWalletIds;
-  },
-  setFeaturedWalletIds(featuredWalletIds) {
-    state$i.featuredWalletIds = featuredWalletIds;
-  },
-  setTokens(tokens) {
-    state$i.tokens = tokens;
-  },
-  setTermsConditionsUrl(termsConditionsUrl) {
-    state$i.termsConditionsUrl = termsConditionsUrl;
-  },
-  setPrivacyPolicyUrl(privacyPolicyUrl) {
-    state$i.privacyPolicyUrl = privacyPolicyUrl;
-  },
-  setCustomWallets(customWallets) {
-    state$i.customWallets = customWallets;
-  },
-  setIsSiweEnabled(isSiweEnabled) {
-    state$i.isSiweEnabled = isSiweEnabled;
-  },
-  setEnableAnalytics(enableAnalytics) {
-    state$i.enableAnalytics = enableAnalytics;
-  },
-  setSdkVersion(sdkVersion) {
-    state$i.sdkVersion = sdkVersion;
-  },
-  setMetadata(metadata) {
-    state$i.metadata = metadata;
-  },
-  setOnrampEnabled(enableOnramp) {
-    state$i.enableOnramp = enableOnramp;
-  },
-  setWalletFeaturesEnabled(enableWalletFeatures) {
-    state$i.enableWalletFeatures = enableWalletFeatures;
-  },
-  getSnapshot() {
-    return snapshot(state$i);
-  }
-};
-
-const DEFAULT_OPTIONS = {
-  purchaseCurrencies: [
-    {
-      id: "2b92315d-eab7-5bef-84fa-089a131333f5",
-      name: "USD Coin",
-      symbol: "USDC",
-      networks: [
-        {
-          name: "ethereum-mainnet",
-          display_name: "Ethereum",
-          chain_id: "1",
-          contract_address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-        },
-        {
-          name: "polygon-mainnet",
-          display_name: "Polygon",
-          chain_id: "137",
-          contract_address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
-        }
-      ]
-    },
-    {
-      id: "2b92315d-eab7-5bef-84fa-089a131333f5",
-      name: "Ether",
-      symbol: "ETH",
-      networks: [
-        {
-          name: "ethereum-mainnet",
-          display_name: "Ethereum",
-          chain_id: "1",
-          contract_address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
-        },
-        {
-          name: "polygon-mainnet",
-          display_name: "Polygon",
-          chain_id: "137",
-          contract_address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
-        }
-      ]
-    }
-  ],
-  paymentCurrencies: [
-    {
-      id: "USD",
-      payment_method_limits: [
-        {
-          id: "card",
-          min: "10.00",
-          max: "7500.00"
-        },
-        {
-          id: "ach_bank_account",
-          min: "10.00",
-          max: "25000.00"
-        }
-      ]
-    },
-    {
-      id: "EUR",
-      payment_method_limits: [
-        {
-          id: "card",
-          min: "10.00",
-          max: "7500.00"
-        },
-        {
-          id: "ach_bank_account",
-          min: "10.00",
-          max: "25000.00"
-        }
-      ]
-    }
-  ]
-};
-const baseUrl$2 = CoreHelperUtil.getBlockchainApiUrl();
-const api$2 = new FetchUtil({ baseUrl: baseUrl$2 });
-const BlockchainApiController = {
-  fetchIdentity({ address }) {
-    return api$2.get({
-      path: `/v1/identity/${address}`,
-      params: {
-        projectId: OptionsController.state.projectId
-      }
-    });
-  },
-  fetchTransactions({ account, projectId, cursor, onramp, signal }) {
-    const queryParams = cursor ? { cursor } : {};
-    return api$2.get({
-      path: `/v1/account/${account}/history?projectId=${projectId}${onramp ? `&onramp=${onramp}` : ""}`,
-      params: queryParams,
-      signal
-    });
-  },
-  fetchSwapTokens({ projectId, chainId }) {
-    return api$2.get({
-      path: `/v1/convert/tokens?projectId=${projectId}&chainId=${chainId}`
-    });
-  },
-  fetchTokenPrice({ projectId, addresses }) {
-    return api$2.post({
-      path: "/v1/fungible/price",
-      body: {
-        projectId,
-        currency: "usd",
-        addresses
-      },
-      headers: {
-        "Content-Type": "application/json"
-      }
-    });
-  },
-  fetchSwapAllowance({ projectId, tokenAddress, userAddress }) {
-    const { sdkType, sdkVersion } = OptionsController.state;
-    return api$2.get({
-      path: `/v1/convert/allowance?projectId=${projectId}&tokenAddress=${tokenAddress}&userAddress=${userAddress}`,
-      headers: {
-        "Content-Type": "application/json",
-        "x-sdk-type": sdkType,
-        "x-sdk-version": sdkVersion
-      }
-    });
-  },
-  fetchGasPrice({ projectId, chainId }) {
-    const { sdkType, sdkVersion } = OptionsController.state;
-    return api$2.get({
-      path: `/v1/convert/gas-price?projectId=${projectId}&chainId=${chainId}`,
-      headers: {
-        "Content-Type": "application/json",
-        "x-sdk-type": sdkType,
-        "x-sdk-version": sdkVersion
-      }
-    });
-  },
-  generateSwapCalldata({ amount, from, projectId, to, userAddress }) {
-    return api$2.post({
-      path: "/v1/convert/build-transaction",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: {
-        amount,
-        eip155: {
-          slippage: ConstantsUtil$2.CONVERT_SLIPPAGE_TOLERANCE
-        },
-        from,
-        projectId,
-        to,
-        userAddress
-      }
-    });
-  },
-  generateApproveCalldata({ from, projectId, to, userAddress }) {
-    const { sdkType, sdkVersion } = OptionsController.state;
-    return api$2.get({
-      path: `/v1/convert/build-approve?projectId=${projectId}&userAddress=${userAddress}&from=${from}&to=${to}`,
-      headers: {
-        "Content-Type": "application/json",
-        "x-sdk-type": sdkType,
-        "x-sdk-version": sdkVersion
-      }
-    });
-  },
-  async getBalance(address, chainId) {
-    const { sdkType, sdkVersion } = OptionsController.state;
-    return api$2.get({
-      path: `/v1/account/${address}/balance`,
-      headers: {
-        "x-sdk-type": sdkType,
-        "x-sdk-version": sdkVersion
-      },
-      params: {
-        currency: "usd",
-        projectId: OptionsController.state.projectId,
-        chainId
-      }
-    });
-  },
-  async generateOnRampURL({ destinationWallets, partnerUserId, defaultNetwork, purchaseAmount, paymentAmount }) {
-    const response = await api$2.post({
-      path: `/v1/generators/onrampurl?projectId=${OptionsController.state.projectId}`,
-      body: {
-        destinationWallets,
-        defaultNetwork,
-        partnerUserId,
-        defaultExperience: "buy",
-        presetCryptoAmount: purchaseAmount,
-        presetFiatAmount: paymentAmount
-      }
-    });
-    return response.url;
-  },
-  async getOnrampOptions() {
-    try {
-      const response = await api$2.get({
-        path: `/v1/onramp/options?projectId=${OptionsController.state.projectId}`
-      });
-      return response;
-    } catch (e) {
-      return DEFAULT_OPTIONS;
-    }
-  },
-  async getOnrampQuote({ purchaseCurrency, paymentCurrency, amount, network }) {
-    try {
-      const response = await api$2.post({
-        path: `/v1/onramp/quote?projectId=${OptionsController.state.projectId}`,
-        body: {
-          purchaseCurrency,
-          paymentCurrency,
-          amount,
-          network
-        }
-      });
-      return response;
-    } catch (e) {
-      return {
-        coinbaseFee: { amount, currency: paymentCurrency.id },
-        networkFee: { amount, currency: paymentCurrency.id },
-        paymentSubtotal: { amount, currency: paymentCurrency.id },
-        paymentTotal: { amount, currency: paymentCurrency.id },
-        purchaseAmount: { amount, currency: paymentCurrency.id },
-        quoteId: "mocked-quote-id"
-      };
-    }
-  }
-};
-
-const state$h = proxy({
-  message: "",
-  variant: "success",
-  open: false
-});
-const SnackController = {
-  state: state$h,
-  subscribeKey(key, callback) {
-    return subscribeKey(state$h, key, callback);
-  },
-  showSuccess(message) {
-    state$h.message = message;
-    state$h.variant = "success";
-    state$h.open = true;
-  },
-  showError(message) {
-    const errorMessage = CoreHelperUtil.parseError(message);
-    state$h.message = errorMessage;
-    state$h.variant = "error";
-    state$h.open = true;
-  },
-  hide() {
-    state$h.open = false;
-  }
-};
-
-const WC_DEEPLINK = "WALLETCONNECT_DEEPLINK_CHOICE";
-const W3M_RECENT = "@w3m/recent";
-const W3M_CONNECTED_WALLET_IMAGE_URL = "@w3m/connected_wallet_image_url";
-const W3M_CONNECTED_CONNECTOR = "@w3m/connected_connector";
-const StorageUtil = {
-  setWalletConnectDeepLink({ href, name }) {
-    try {
-      localStorage.setItem(WC_DEEPLINK, JSON.stringify({ href, name }));
-    } catch {
-      console.info("Unable to set WalletConnect deep link");
-    }
-  },
-  getWalletConnectDeepLink() {
-    try {
-      const deepLink = localStorage.getItem(WC_DEEPLINK);
-      if (deepLink) {
-        return JSON.parse(deepLink);
-      }
-    } catch {
-      console.info("Unable to get WalletConnect deep link");
-    }
-    return void 0;
-  },
-  deleteWalletConnectDeepLink() {
-    try {
-      localStorage.removeItem(WC_DEEPLINK);
-    } catch {
-      console.info("Unable to delete WalletConnect deep link");
-    }
-  },
-  setWeb3ModalRecent(wallet) {
-    try {
-      const recentWallets = StorageUtil.getRecentWallets();
-      const exists = recentWallets.find((w) => w.id === wallet.id);
-      if (!exists) {
-        recentWallets.unshift(wallet);
-        if (recentWallets.length > 2) {
-          recentWallets.pop();
-        }
-        localStorage.setItem(W3M_RECENT, JSON.stringify(recentWallets));
-      }
-    } catch {
-      console.info("Unable to set Web3Modal recent");
-    }
-  },
-  getRecentWallets() {
-    try {
-      const recent = localStorage.getItem(W3M_RECENT);
-      return recent ? JSON.parse(recent) : [];
-    } catch {
-      console.info("Unable to get Web3Modal recent");
-    }
-    return [];
-  },
-  setConnectedWalletImageUrl(imageUrl) {
-    try {
-      localStorage.setItem(W3M_CONNECTED_WALLET_IMAGE_URL, imageUrl);
-    } catch {
-      console.info("Unable to set Connected Wallet Image Url");
-    }
-  },
-  removeConnectedWalletImageUrl() {
-    try {
-      localStorage.removeItem(W3M_CONNECTED_WALLET_IMAGE_URL);
-    } catch {
-      console.info("Unable to remove Connected Wallet Image Url");
-    }
-  },
-  getConnectedWalletImageUrl() {
-    try {
-      return localStorage.getItem(W3M_CONNECTED_WALLET_IMAGE_URL);
-    } catch {
-      console.info("Unable to set Connected Wallet Image Url");
-    }
-    return void 0;
-  },
-  setConnectedConnector(connectorType) {
-    try {
-      localStorage.setItem(W3M_CONNECTED_CONNECTOR, connectorType);
-    } catch {
-      console.info("Unable to set Connected Connector");
-    }
-  },
-  getConnectedConnector() {
-    try {
-      return localStorage.getItem(W3M_CONNECTED_CONNECTOR);
-    } catch {
-      console.info("Unable to get Connected Connector");
-    }
-    return void 0;
-  }
-};
-
-const baseUrl$1 = CoreHelperUtil.getAnalyticsUrl();
-const api$1 = new FetchUtil({ baseUrl: baseUrl$1 });
-const excluded = ["MODAL_CREATED"];
-const state$g = proxy({
-  timestamp: Date.now(),
-  data: {
-    type: "track",
-    event: "MODAL_CREATED"
-  }
-});
-const EventsController = {
-  state: state$g,
-  subscribe(callback) {
-    return subscribe(state$g, () => callback(state$g));
-  },
-  _getApiHeaders() {
-    const { projectId, sdkType, sdkVersion } = OptionsController.state;
-    return {
-      "x-project-id": projectId,
-      "x-sdk-type": sdkType,
-      "x-sdk-version": sdkVersion
-    };
-  },
-  async _sendAnalyticsEvent(payload) {
-    try {
-      if (excluded.includes(payload.data.event) || false) {
-        return;
-      }
-      await api$1.post({
-        path: "/e",
-        headers: EventsController._getApiHeaders(),
-        body: {
-          eventId: CoreHelperUtil.getUUID(),
-          url: window.location.href,
-          domain: window.location.hostname,
-          timestamp: payload.timestamp,
-          props: payload.data
-        }
-      });
-    } catch {
-    }
-  },
-  sendEvent(data) {
-    state$g.timestamp = Date.now();
-    state$g.data = data;
-    if (OptionsController.state.enableAnalytics) {
-      EventsController._sendAnalyticsEvent(state$g);
-    }
-  }
-};
-
-const state$f = proxy({
-  transactions: [],
-  coinbaseTransactions: {},
-  transactionsByYear: {},
-  loading: false,
-  empty: false,
-  next: void 0
-});
-const TransactionsController = {
-  state: state$f,
-  subscribe(callback) {
-    return subscribe(state$f, () => callback(state$f));
-  },
-  async fetchTransactions(accountAddress, onramp) {
-    const { projectId } = OptionsController.state;
-    if (!projectId || !accountAddress) {
-      throw new Error("Transactions can't be fetched without a projectId and an accountAddress");
-    }
-    state$f.loading = true;
-    try {
-      const response = await BlockchainApiController.fetchTransactions({
-        account: accountAddress,
-        projectId,
-        cursor: state$f.next,
-        onramp
-      });
-      const nonSpamTransactions = this.filterSpamTransactions(response.data);
-      const filteredTransactions = [...state$f.transactions, ...nonSpamTransactions];
-      state$f.loading = false;
-      if (onramp === "coinbase") {
-        state$f.coinbaseTransactions = this.groupTransactionsByYearAndMonth(state$f.coinbaseTransactions, response.data);
-      } else {
-        state$f.transactions = filteredTransactions;
-        state$f.transactionsByYear = this.groupTransactionsByYearAndMonth(state$f.transactionsByYear, nonSpamTransactions);
-      }
-      state$f.empty = filteredTransactions.length === 0;
-      state$f.next = response.next ? response.next : void 0;
-    } catch (error) {
-      EventsController.sendEvent({
-        type: "track",
-        event: "ERROR_FETCH_TRANSACTIONS",
-        properties: {
-          address: accountAddress,
-          projectId,
-          cursor: state$f.next
-        }
-      });
-      SnackController.showError("Failed to fetch transactions");
-      state$f.loading = false;
-      state$f.empty = true;
-      state$f.next = void 0;
-    }
-  },
-  groupTransactionsByYearAndMonth(transactionsMap = {}, transactions = []) {
-    const grouped = transactionsMap;
-    transactions.forEach((transaction) => {
-      const year = new Date(transaction.metadata.minedAt).getFullYear();
-      const month = new Date(transaction.metadata.minedAt).getMonth();
-      const yearTransactions = grouped[year] ?? {};
-      const monthTransactions = yearTransactions[month] ?? [];
-      const newMonthTransactions = monthTransactions.filter((tx) => tx.id !== transaction.id);
-      grouped[year] = {
-        ...yearTransactions,
-        [month]: [...newMonthTransactions, transaction].sort((a, b) => new Date(b.metadata.minedAt).getTime() - new Date(a.metadata.minedAt).getTime())
-      };
-    });
-    return grouped;
-  },
-  filterSpamTransactions(transactions) {
-    return transactions.filter((transaction) => {
-      const isAllSpam = transaction.transfers.every((transfer) => transfer.nft_info?.flags.is_spam === true);
-      return !isAllSpam;
-    });
-  },
-  clearCursor() {
-    state$f.next = void 0;
-  },
-  resetTransactions() {
-    state$f.transactions = [];
-    state$f.transactionsByYear = {};
-    state$f.loading = false;
-    state$f.empty = false;
-    state$f.next = void 0;
-  }
-};
-
-const state$e = proxy({
-  wcError: false,
-  buffering: false
-});
-const ConnectionController = {
-  state: state$e,
-  subscribeKey(key, callback) {
-    return subscribeKey(state$e, key, callback);
-  },
-  _getClient() {
-    if (!state$e._client) {
-      throw new Error("ConnectionController client not set");
-    }
-    return state$e._client;
-  },
-  setClient(client) {
-    state$e._client = ref(client);
-  },
-  connectWalletConnect() {
-    state$e.wcPromise = this._getClient().connectWalletConnect((uri) => {
-      state$e.wcUri = uri;
-      state$e.wcPairingExpiry = CoreHelperUtil.getPairingExpiry();
-    });
-    StorageUtil.setConnectedConnector("WALLET_CONNECT");
-  },
-  async connectExternal(options) {
-    await this._getClient().connectExternal?.(options);
-    StorageUtil.setConnectedConnector(options.type);
-  },
-  async reconnectExternal(options) {
-    await this._getClient().reconnectExternal?.(options);
-    StorageUtil.setConnectedConnector(options.type);
-  },
-  async signMessage(message) {
-    return this._getClient().signMessage(message);
-  },
-  parseUnits(value, decimals) {
-    return this._getClient().parseUnits(value, decimals);
-  },
-  formatUnits(value, decimals) {
-    return this._getClient().formatUnits(value, decimals);
-  },
-  async sendTransaction(args) {
-    return this._getClient().sendTransaction(args);
-  },
-  async estimateGas(args) {
-    return this._getClient().estimateGas(args);
-  },
-  async writeContract(args) {
-    return this._getClient().writeContract(args);
-  },
-  async getEnsAddress(value) {
-    return this._getClient().getEnsAddress(value);
-  },
-  async getEnsAvatar(value) {
-    return this._getClient().getEnsAvatar(value);
-  },
-  checkInstalled(ids) {
-    return this._getClient().checkInstalled?.(ids);
-  },
-  resetWcConnection() {
-    state$e.wcUri = void 0;
-    state$e.wcPairingExpiry = void 0;
-    state$e.wcPromise = void 0;
-    state$e.wcLinking = void 0;
-    state$e.recentWallet = void 0;
-    TransactionsController.resetTransactions();
-    StorageUtil.deleteWalletConnectDeepLink();
-  },
-  setWcLinking(wcLinking) {
-    state$e.wcLinking = wcLinking;
-  },
-  setWcError(wcError) {
-    state$e.wcError = wcError;
-    state$e.buffering = false;
-  },
-  setRecentWallet(wallet) {
-    state$e.recentWallet = wallet;
-  },
-  setBuffering(buffering) {
-    state$e.buffering = buffering;
-  },
-  async disconnect() {
-    await this._getClient().disconnect();
-    StorageUtil.removeConnectedWalletImageUrl();
-    this.resetWcConnection();
-  }
-};
-
-const state$d = proxy({
-  loading: false,
-  open: false,
-  selectedNetworkId: void 0
-});
-const PublicStateController = {
-  state: state$d,
-  subscribe(callback) {
-    return subscribe(state$d, () => callback(state$d));
-  },
-  set(newState) {
-    Object.assign(state$d, { ...state$d, ...newState });
-  }
-};
 
 dayjs.extend(relativeTime);
 dayjs.extend(updateLocale);
@@ -1162,6 +526,57 @@ const NumberUtil = {
       maximumFractionDigits: decimals,
       minimumFractionDigits: decimals
     });
+  }
+};
+
+const InputUtil = {
+  numericInputKeyDown(event, currentValue, onChange) {
+    const allowedKeys = [
+      "Backspace",
+      "Meta",
+      "Ctrl",
+      "a",
+      "A",
+      "c",
+      "C",
+      "x",
+      "X",
+      "v",
+      "V",
+      "ArrowLeft",
+      "ArrowRight",
+      "Tab"
+    ];
+    const controlPressed = event.metaKey || event.ctrlKey;
+    const selectAll = event.key === "a" || event.key === "A";
+    const copyKey = event.key === "c" || event.key === "C";
+    const pasteKey = event.key === "v" || event.key === "V";
+    const cutKey = event.key === "x" || event.key === "X";
+    const isComma = event.key === ",";
+    const isDot = event.key === ".";
+    const isNumericKey = event.key >= "0" && event.key <= "9";
+    if (!controlPressed && (selectAll || copyKey || pasteKey || cutKey)) {
+      event.preventDefault();
+    }
+    if (currentValue === "0" && !isComma && !isDot && event.key === "0") {
+      event.preventDefault();
+    }
+    if (currentValue === "0" && isNumericKey) {
+      onChange(event.key);
+      event.preventDefault();
+    }
+    if (isComma || isDot) {
+      if (!currentValue) {
+        onChange("0.");
+        event.preventDefault();
+      }
+      if (currentValue?.includes(".") || currentValue?.includes(",")) {
+        event.preventDefault();
+      }
+    }
+    if (!isNumericKey && !allowedKeys.includes(event.key) && !isDot && !isComma) {
+      event.preventDefault();
+    }
   }
 };
 
@@ -1388,6 +803,17 @@ const erc20ABI = [
   }
 ];
 
+const NavigationUtil = {
+  URLS: {
+    FAQ: "https://walletconnect.com/faq"
+  }
+};
+
+const ConstantsUtil$2 = {
+  WC_NAME_SUFFIX: ".wcn.id",
+  WC_NAMES_ALLOWED_DOMAINS: ["walletconnect.com"]
+};
+
 function getW3mThemeVariables(themeVariables, themeType) {
   if (themeType === "light") {
     return {
@@ -1401,63 +827,760 @@ function getW3mThemeVariables(themeVariables, themeType) {
   };
 }
 
-const state$c = proxy({
+const state$j = proxy({
+  projectId: "",
+  sdkType: "w3m",
+  sdkVersion: "html-wagmi-undefined"
+});
+const OptionsController = {
+  state: state$j,
+  subscribeKey(key, callback) {
+    return subscribeKey(state$j, key, callback);
+  },
+  setProjectId(projectId) {
+    state$j.projectId = projectId;
+  },
+  setAllWallets(allWallets) {
+    state$j.allWallets = allWallets;
+  },
+  setIncludeWalletIds(includeWalletIds) {
+    state$j.includeWalletIds = includeWalletIds;
+  },
+  setExcludeWalletIds(excludeWalletIds) {
+    state$j.excludeWalletIds = excludeWalletIds;
+  },
+  setFeaturedWalletIds(featuredWalletIds) {
+    state$j.featuredWalletIds = featuredWalletIds;
+  },
+  setTokens(tokens) {
+    state$j.tokens = tokens;
+  },
+  setTermsConditionsUrl(termsConditionsUrl) {
+    state$j.termsConditionsUrl = termsConditionsUrl;
+  },
+  setPrivacyPolicyUrl(privacyPolicyUrl) {
+    state$j.privacyPolicyUrl = privacyPolicyUrl;
+  },
+  setCustomWallets(customWallets) {
+    state$j.customWallets = customWallets;
+  },
+  setIsSiweEnabled(isSiweEnabled) {
+    state$j.isSiweEnabled = isSiweEnabled;
+  },
+  setEnableAnalytics(enableAnalytics) {
+    state$j.enableAnalytics = enableAnalytics;
+  },
+  setSdkVersion(sdkVersion) {
+    state$j.sdkVersion = sdkVersion;
+  },
+  setMetadata(metadata) {
+    state$j.metadata = metadata;
+  },
+  setOnrampEnabled(enableOnramp) {
+    state$j.enableOnramp = enableOnramp;
+  },
+  setWalletFeaturesEnabled(enableWalletFeatures) {
+    state$j.enableWalletFeatures = enableWalletFeatures;
+  },
+  getSnapshot() {
+    return snapshot(state$j);
+  }
+};
+
+const DEFAULT_OPTIONS = {
+  purchaseCurrencies: [
+    {
+      id: "2b92315d-eab7-5bef-84fa-089a131333f5",
+      name: "USD Coin",
+      symbol: "USDC",
+      networks: [
+        {
+          name: "ethereum-mainnet",
+          display_name: "Ethereum",
+          chain_id: "1",
+          contract_address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        {
+          name: "polygon-mainnet",
+          display_name: "Polygon",
+          chain_id: "137",
+          contract_address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+        }
+      ]
+    },
+    {
+      id: "2b92315d-eab7-5bef-84fa-089a131333f5",
+      name: "Ether",
+      symbol: "ETH",
+      networks: [
+        {
+          name: "ethereum-mainnet",
+          display_name: "Ethereum",
+          chain_id: "1",
+          contract_address: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
+        },
+        {
+          name: "polygon-mainnet",
+          display_name: "Polygon",
+          chain_id: "137",
+          contract_address: "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"
+        }
+      ]
+    }
+  ],
+  paymentCurrencies: [
+    {
+      id: "USD",
+      payment_method_limits: [
+        {
+          id: "card",
+          min: "10.00",
+          max: "7500.00"
+        },
+        {
+          id: "ach_bank_account",
+          min: "10.00",
+          max: "25000.00"
+        }
+      ]
+    },
+    {
+      id: "EUR",
+      payment_method_limits: [
+        {
+          id: "card",
+          min: "10.00",
+          max: "7500.00"
+        },
+        {
+          id: "ach_bank_account",
+          min: "10.00",
+          max: "25000.00"
+        }
+      ]
+    }
+  ]
+};
+const baseUrl$2 = CoreHelperUtil.getBlockchainApiUrl();
+const api$2 = new FetchUtil({ baseUrl: baseUrl$2 });
+const BlockchainApiController = {
+  fetchIdentity({ address }) {
+    return api$2.get({
+      path: `/v1/identity/${address}`,
+      params: {
+        projectId: OptionsController.state.projectId
+      }
+    });
+  },
+  fetchTransactions({ account, projectId, cursor, onramp, signal }) {
+    const queryParams = cursor ? { cursor } : {};
+    return api$2.get({
+      path: `/v1/account/${account}/history?projectId=${projectId}${onramp ? `&onramp=${onramp}` : ""}`,
+      params: queryParams,
+      signal
+    });
+  },
+  fetchSwapQuote({ projectId, amount, userAddress, from, to, gasPrice }) {
+    return api$2.get({
+      path: `/v1/convert/quotes`,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      params: {
+        projectId,
+        amount,
+        userAddress,
+        from,
+        to,
+        gasPrice
+      }
+    });
+  },
+  fetchSwapTokens({ projectId, chainId }) {
+    return api$2.get({
+      path: `/v1/convert/tokens?projectId=${projectId}&chainId=${chainId}`
+    });
+  },
+  fetchTokenPrice({ projectId, addresses }) {
+    return api$2.post({
+      path: "/v1/fungible/price",
+      body: {
+        projectId,
+        currency: "usd",
+        addresses
+      },
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+  },
+  fetchSwapAllowance({ projectId, tokenAddress, userAddress }) {
+    const { sdkType, sdkVersion } = OptionsController.state;
+    return api$2.get({
+      path: `/v1/convert/allowance?projectId=${projectId}&tokenAddress=${tokenAddress}&userAddress=${userAddress}`,
+      headers: {
+        "Content-Type": "application/json",
+        "x-sdk-type": sdkType,
+        "x-sdk-version": sdkVersion
+      }
+    });
+  },
+  fetchGasPrice({ projectId, chainId }) {
+    const { sdkType, sdkVersion } = OptionsController.state;
+    return api$2.get({
+      path: `/v1/convert/gas-price`,
+      headers: {
+        "Content-Type": "application/json",
+        "x-sdk-type": sdkType,
+        "x-sdk-version": sdkVersion
+      },
+      params: {
+        projectId,
+        chainId
+      }
+    });
+  },
+  generateSwapCalldata({ amount, from, projectId, to, userAddress }) {
+    return api$2.post({
+      path: "/v1/convert/build-transaction",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: {
+        amount,
+        eip155: {
+          slippage: ConstantsUtil$3.CONVERT_SLIPPAGE_TOLERANCE
+        },
+        from,
+        projectId,
+        to,
+        userAddress
+      }
+    });
+  },
+  generateApproveCalldata({ from, projectId, to, userAddress }) {
+    const { sdkType, sdkVersion } = OptionsController.state;
+    return api$2.get({
+      path: `/v1/convert/build-approve`,
+      headers: {
+        "Content-Type": "application/json",
+        "x-sdk-type": sdkType,
+        "x-sdk-version": sdkVersion
+      },
+      params: {
+        projectId,
+        userAddress,
+        from,
+        to
+      }
+    });
+  },
+  async getBalance(address, chainId, forceUpdate) {
+    const { sdkType, sdkVersion } = OptionsController.state;
+    return api$2.get({
+      path: `/v1/account/${address}/balance`,
+      headers: {
+        "x-sdk-type": sdkType,
+        "x-sdk-version": sdkVersion
+      },
+      params: {
+        currency: "usd",
+        projectId: OptionsController.state.projectId,
+        chainId,
+        forceUpdate
+      }
+    });
+  },
+  async lookupEnsName(name) {
+    return api$2.get({
+      path: `/v1/profile/account/${name}${ConstantsUtil$2.WC_NAME_SUFFIX}?projectId=${OptionsController.state.projectId}`
+    });
+  },
+  async reverseLookupEnsName({ address }) {
+    return api$2.get({
+      path: `/v1/profile/reverse/${address}?projectId=${OptionsController.state.projectId}`
+    });
+  },
+  async getEnsNameSuggestions(name) {
+    return api$2.get({
+      path: `/v1/profile/suggestions/${name}?projectId=${OptionsController.state.projectId}`
+    });
+  },
+  async registerEnsName({ coinType, address, message, signature }) {
+    return api$2.post({
+      path: `/v1/profile/account`,
+      body: { coin_type: coinType, address, message, signature },
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+  },
+  async generateOnRampURL({ destinationWallets, partnerUserId, defaultNetwork, purchaseAmount, paymentAmount }) {
+    const response = await api$2.post({
+      path: `/v1/generators/onrampurl?projectId=${OptionsController.state.projectId}`,
+      body: {
+        destinationWallets,
+        defaultNetwork,
+        partnerUserId,
+        defaultExperience: "buy",
+        presetCryptoAmount: purchaseAmount,
+        presetFiatAmount: paymentAmount
+      }
+    });
+    return response.url;
+  },
+  async getOnrampOptions() {
+    try {
+      const response = await api$2.get({
+        path: `/v1/onramp/options?projectId=${OptionsController.state.projectId}`
+      });
+      return response;
+    } catch (e) {
+      return DEFAULT_OPTIONS;
+    }
+  },
+  async getOnrampQuote({ purchaseCurrency, paymentCurrency, amount, network }) {
+    try {
+      const response = await api$2.post({
+        path: `/v1/onramp/quote?projectId=${OptionsController.state.projectId}`,
+        body: {
+          purchaseCurrency,
+          paymentCurrency,
+          amount,
+          network
+        }
+      });
+      return response;
+    } catch (e) {
+      return {
+        coinbaseFee: { amount, currency: paymentCurrency.id },
+        networkFee: { amount, currency: paymentCurrency.id },
+        paymentSubtotal: { amount, currency: paymentCurrency.id },
+        paymentTotal: { amount, currency: paymentCurrency.id },
+        purchaseAmount: { amount, currency: paymentCurrency.id },
+        quoteId: "mocked-quote-id"
+      };
+    }
+  }
+};
+
+const state$i = proxy({
+  message: "",
+  variant: "success",
+  open: false
+});
+const SnackController = {
+  state: state$i,
+  subscribeKey(key, callback) {
+    return subscribeKey(state$i, key, callback);
+  },
+  showSuccess(message) {
+    state$i.message = message;
+    state$i.variant = "success";
+    state$i.open = true;
+  },
+  showError(message) {
+    const errorMessage = CoreHelperUtil.parseError(message);
+    state$i.message = errorMessage;
+    state$i.variant = "error";
+    state$i.open = true;
+  },
+  hide() {
+    state$i.open = false;
+  }
+};
+
+const WC_DEEPLINK = "WALLETCONNECT_DEEPLINK_CHOICE";
+const W3M_RECENT = "@w3m/recent";
+const W3M_CONNECTED_WALLET_IMAGE_URL = "@w3m/connected_wallet_image_url";
+const W3M_CONNECTED_CONNECTOR = "@w3m/connected_connector";
+const StorageUtil = {
+  setWalletConnectDeepLink({ href, name }) {
+    try {
+      localStorage.setItem(WC_DEEPLINK, JSON.stringify({ href, name }));
+    } catch {
+      console.info("Unable to set WalletConnect deep link");
+    }
+  },
+  getWalletConnectDeepLink() {
+    try {
+      const deepLink = localStorage.getItem(WC_DEEPLINK);
+      if (deepLink) {
+        return JSON.parse(deepLink);
+      }
+    } catch {
+      console.info("Unable to get WalletConnect deep link");
+    }
+    return void 0;
+  },
+  deleteWalletConnectDeepLink() {
+    try {
+      localStorage.removeItem(WC_DEEPLINK);
+    } catch {
+      console.info("Unable to delete WalletConnect deep link");
+    }
+  },
+  setWeb3ModalRecent(wallet) {
+    try {
+      const recentWallets = StorageUtil.getRecentWallets();
+      const exists = recentWallets.find((w) => w.id === wallet.id);
+      if (!exists) {
+        recentWallets.unshift(wallet);
+        if (recentWallets.length > 2) {
+          recentWallets.pop();
+        }
+        localStorage.setItem(W3M_RECENT, JSON.stringify(recentWallets));
+      }
+    } catch {
+      console.info("Unable to set Web3Modal recent");
+    }
+  },
+  getRecentWallets() {
+    try {
+      const recent = localStorage.getItem(W3M_RECENT);
+      return recent ? JSON.parse(recent) : [];
+    } catch {
+      console.info("Unable to get Web3Modal recent");
+    }
+    return [];
+  },
+  setConnectedWalletImageUrl(imageUrl) {
+    try {
+      localStorage.setItem(W3M_CONNECTED_WALLET_IMAGE_URL, imageUrl);
+    } catch {
+      console.info("Unable to set Connected Wallet Image Url");
+    }
+  },
+  removeConnectedWalletImageUrl() {
+    try {
+      localStorage.removeItem(W3M_CONNECTED_WALLET_IMAGE_URL);
+    } catch {
+      console.info("Unable to remove Connected Wallet Image Url");
+    }
+  },
+  getConnectedWalletImageUrl() {
+    try {
+      return localStorage.getItem(W3M_CONNECTED_WALLET_IMAGE_URL);
+    } catch {
+      console.info("Unable to set Connected Wallet Image Url");
+    }
+    return void 0;
+  },
+  setConnectedConnector(connectorType) {
+    try {
+      localStorage.setItem(W3M_CONNECTED_CONNECTOR, connectorType);
+    } catch {
+      console.info("Unable to set Connected Connector");
+    }
+  },
+  getConnectedConnector() {
+    try {
+      return localStorage.getItem(W3M_CONNECTED_CONNECTOR);
+    } catch {
+      console.info("Unable to get Connected Connector");
+    }
+    return void 0;
+  }
+};
+
+const baseUrl$1 = CoreHelperUtil.getAnalyticsUrl();
+const api$1 = new FetchUtil({ baseUrl: baseUrl$1 });
+const excluded = ["MODAL_CREATED"];
+const state$h = proxy({
+  timestamp: Date.now(),
+  data: {
+    type: "track",
+    event: "MODAL_CREATED"
+  }
+});
+const EventsController = {
+  state: state$h,
+  subscribe(callback) {
+    return subscribe(state$h, () => callback(state$h));
+  },
+  _getApiHeaders() {
+    const { projectId, sdkType, sdkVersion } = OptionsController.state;
+    return {
+      "x-project-id": projectId,
+      "x-sdk-type": sdkType,
+      "x-sdk-version": sdkVersion
+    };
+  },
+  async _sendAnalyticsEvent(payload) {
+    try {
+      if (excluded.includes(payload.data.event) || false) {
+        return;
+      }
+      await api$1.post({
+        path: "/e",
+        headers: EventsController._getApiHeaders(),
+        body: {
+          eventId: CoreHelperUtil.getUUID(),
+          url: window.location.href,
+          domain: window.location.hostname,
+          timestamp: payload.timestamp,
+          props: payload.data
+        }
+      });
+    } catch {
+    }
+  },
+  sendEvent(data) {
+    state$h.timestamp = Date.now();
+    state$h.data = data;
+    if (OptionsController.state.enableAnalytics) {
+      EventsController._sendAnalyticsEvent(state$h);
+    }
+  }
+};
+
+const state$g = proxy({
+  transactions: [],
+  coinbaseTransactions: {},
+  transactionsByYear: {},
+  loading: false,
+  empty: false,
+  next: void 0
+});
+const TransactionsController = {
+  state: state$g,
+  subscribe(callback) {
+    return subscribe(state$g, () => callback(state$g));
+  },
+  async fetchTransactions(accountAddress, onramp) {
+    const { projectId } = OptionsController.state;
+    if (!projectId || !accountAddress) {
+      throw new Error("Transactions can't be fetched without a projectId and an accountAddress");
+    }
+    state$g.loading = true;
+    try {
+      const response = await BlockchainApiController.fetchTransactions({
+        account: accountAddress,
+        projectId,
+        cursor: state$g.next,
+        onramp
+      });
+      const nonSpamTransactions = this.filterSpamTransactions(response.data);
+      const filteredTransactions = [...state$g.transactions, ...nonSpamTransactions];
+      state$g.loading = false;
+      if (onramp === "coinbase") {
+        state$g.coinbaseTransactions = this.groupTransactionsByYearAndMonth(state$g.coinbaseTransactions, response.data);
+      } else {
+        state$g.transactions = filteredTransactions;
+        state$g.transactionsByYear = this.groupTransactionsByYearAndMonth(state$g.transactionsByYear, nonSpamTransactions);
+      }
+      state$g.empty = filteredTransactions.length === 0;
+      state$g.next = response.next ? response.next : void 0;
+    } catch (error) {
+      EventsController.sendEvent({
+        type: "track",
+        event: "ERROR_FETCH_TRANSACTIONS",
+        properties: {
+          address: accountAddress,
+          projectId,
+          cursor: state$g.next
+        }
+      });
+      SnackController.showError("Failed to fetch transactions");
+      state$g.loading = false;
+      state$g.empty = true;
+      state$g.next = void 0;
+    }
+  },
+  groupTransactionsByYearAndMonth(transactionsMap = {}, transactions = []) {
+    const grouped = transactionsMap;
+    transactions.forEach((transaction) => {
+      const year = new Date(transaction.metadata.minedAt).getFullYear();
+      const month = new Date(transaction.metadata.minedAt).getMonth();
+      const yearTransactions = grouped[year] ?? {};
+      const monthTransactions = yearTransactions[month] ?? [];
+      const newMonthTransactions = monthTransactions.filter((tx) => tx.id !== transaction.id);
+      grouped[year] = {
+        ...yearTransactions,
+        [month]: [...newMonthTransactions, transaction].sort((a, b) => new Date(b.metadata.minedAt).getTime() - new Date(a.metadata.minedAt).getTime())
+      };
+    });
+    return grouped;
+  },
+  filterSpamTransactions(transactions) {
+    return transactions.filter((transaction) => {
+      const isAllSpam = transaction.transfers.every((transfer) => transfer.nft_info?.flags.is_spam === true);
+      return !isAllSpam;
+    });
+  },
+  clearCursor() {
+    state$g.next = void 0;
+  },
+  resetTransactions() {
+    state$g.transactions = [];
+    state$g.transactionsByYear = {};
+    state$g.loading = false;
+    state$g.empty = false;
+    state$g.next = void 0;
+  }
+};
+
+const state$f = proxy({
+  wcError: false,
+  buffering: false
+});
+const ConnectionController = {
+  state: state$f,
+  subscribeKey(key, callback) {
+    return subscribeKey(state$f, key, callback);
+  },
+  _getClient() {
+    if (!state$f._client) {
+      throw new Error("ConnectionController client not set");
+    }
+    return state$f._client;
+  },
+  setClient(client) {
+    state$f._client = ref(client);
+  },
+  connectWalletConnect() {
+    state$f.wcPromise = this._getClient().connectWalletConnect((uri) => {
+      state$f.wcUri = uri;
+      state$f.wcPairingExpiry = CoreHelperUtil.getPairingExpiry();
+    });
+    StorageUtil.setConnectedConnector("WALLET_CONNECT");
+  },
+  async connectExternal(options) {
+    await this._getClient().connectExternal?.(options);
+    StorageUtil.setConnectedConnector(options.type);
+  },
+  async reconnectExternal(options) {
+    await this._getClient().reconnectExternal?.(options);
+    StorageUtil.setConnectedConnector(options.type);
+  },
+  async signMessage(message) {
+    return this._getClient().signMessage(message);
+  },
+  parseUnits(value, decimals) {
+    return this._getClient().parseUnits(value, decimals);
+  },
+  formatUnits(value, decimals) {
+    return this._getClient().formatUnits(value, decimals);
+  },
+  async sendTransaction(args) {
+    return this._getClient().sendTransaction(args);
+  },
+  async estimateGas(args) {
+    return this._getClient().estimateGas(args);
+  },
+  async writeContract(args) {
+    return this._getClient().writeContract(args);
+  },
+  async getEnsAddress(value) {
+    return this._getClient().getEnsAddress(value);
+  },
+  async getEnsAvatar(value) {
+    return this._getClient().getEnsAvatar(value);
+  },
+  checkInstalled(ids) {
+    return this._getClient().checkInstalled?.(ids);
+  },
+  resetWcConnection() {
+    state$f.wcUri = void 0;
+    state$f.wcPairingExpiry = void 0;
+    state$f.wcPromise = void 0;
+    state$f.wcLinking = void 0;
+    state$f.recentWallet = void 0;
+    TransactionsController.resetTransactions();
+    StorageUtil.deleteWalletConnectDeepLink();
+  },
+  setWcLinking(wcLinking) {
+    state$f.wcLinking = wcLinking;
+  },
+  setWcError(wcError) {
+    state$f.wcError = wcError;
+    state$f.buffering = false;
+  },
+  setRecentWallet(wallet) {
+    state$f.recentWallet = wallet;
+  },
+  setBuffering(buffering) {
+    state$f.buffering = buffering;
+  },
+  async disconnect() {
+    await this._getClient().disconnect();
+    StorageUtil.removeConnectedWalletImageUrl();
+    this.resetWcConnection();
+  }
+};
+
+const state$e = proxy({
+  loading: false,
+  open: false,
+  selectedNetworkId: void 0
+});
+const PublicStateController = {
+  state: state$e,
+  subscribe(callback) {
+    return subscribe(state$e, () => callback(state$e));
+  },
+  set(newState) {
+    Object.assign(state$e, { ...state$e, ...newState });
+  }
+};
+
+const state$d = proxy({
   supportsAllNetworks: true,
   isDefaultCaipNetwork: false,
   smartAccountEnabledNetworks: []
 });
 const NetworkController = {
-  state: state$c,
+  state: state$d,
   subscribe(callback) {
-    return subscribe(state$c, () => callback(state$c));
+    return subscribe(state$d, () => callback(state$d));
   },
   subscribeKey(key, callback) {
-    return subscribeKey$1(state$c, key, callback);
+    return subscribeKey$1(state$d, key, callback);
   },
   _getClient() {
-    if (!state$c._client) {
+    if (!state$d._client) {
       throw new Error("NetworkController client not set");
     }
-    return state$c._client;
+    return state$d._client;
   },
   setClient(client) {
-    state$c._client = ref(client);
+    state$d._client = ref(client);
   },
   setCaipNetwork(caipNetwork) {
-    state$c.caipNetwork = caipNetwork;
+    state$d.caipNetwork = caipNetwork;
     PublicStateController.set({ selectedNetworkId: caipNetwork?.id });
     if (!this.state.allowUnsupportedChain) {
       this.checkIfSupportedNetwork();
     }
   },
   setDefaultCaipNetwork(caipNetwork) {
-    state$c.caipNetwork = caipNetwork;
+    state$d.caipNetwork = caipNetwork;
     PublicStateController.set({ selectedNetworkId: caipNetwork?.id });
-    state$c.isDefaultCaipNetwork = true;
+    state$d.isDefaultCaipNetwork = true;
   },
   setRequestedCaipNetworks(requestedNetworks) {
-    state$c.requestedCaipNetworks = requestedNetworks;
+    state$d.requestedCaipNetworks = requestedNetworks;
   },
   setAllowUnsupportedChain(allowUnsupportedChain) {
-    state$c.allowUnsupportedChain = allowUnsupportedChain;
+    state$d.allowUnsupportedChain = allowUnsupportedChain;
   },
   setSmartAccountEnabledNetworks(smartAccountEnabledNetworks) {
-    state$c.smartAccountEnabledNetworks = smartAccountEnabledNetworks;
+    state$d.smartAccountEnabledNetworks = smartAccountEnabledNetworks;
   },
   getRequestedCaipNetworks() {
-    const { approvedCaipNetworkIds, requestedCaipNetworks } = state$c;
+    const { approvedCaipNetworkIds, requestedCaipNetworks } = state$d;
     const approvedIds = approvedCaipNetworkIds;
     const requestedNetworks = requestedCaipNetworks;
     return CoreHelperUtil.sortRequestedNetworks(approvedIds, requestedNetworks);
   },
   async getApprovedCaipNetworksData() {
     const data = await this._getClient().getApprovedCaipNetworksData();
-    state$c.supportsAllNetworks = data.supportsAllNetworks;
-    state$c.approvedCaipNetworkIds = data.approvedCaipNetworkIds;
+    state$d.supportsAllNetworks = data.supportsAllNetworks;
+    state$d.approvedCaipNetworkIds = data.approvedCaipNetworkIds;
   },
   async switchActiveNetwork(network) {
     await this._getClient().switchCaipNetwork(network);
-    state$c.caipNetwork = network;
+    state$d.caipNetwork = network;
     if (network) {
       EventsController.sendEvent({
         type: "track",
@@ -1467,25 +1590,25 @@ const NetworkController = {
     }
   },
   checkIfSupportedNetwork() {
-    state$c.isUnsupportedChain = !state$c.requestedCaipNetworks?.some((network) => network.id === state$c.caipNetwork?.id);
-    if (state$c.isUnsupportedChain) {
+    state$d.isUnsupportedChain = !state$d.requestedCaipNetworks?.some((network) => network.id === state$d.caipNetwork?.id);
+    if (state$d.isUnsupportedChain) {
       this.showUnsupportedChainUI();
     }
   },
   checkIfSmartAccountEnabled() {
-    const networkId = NetworkUtil.caipNetworkIdToNumber(state$c.caipNetwork?.id);
+    const networkId = NetworkUtil.caipNetworkIdToNumber(state$d.caipNetwork?.id);
     if (!networkId) {
       return false;
     }
-    return Boolean(state$c.smartAccountEnabledNetworks?.includes(networkId));
+    return Boolean(state$d.smartAccountEnabledNetworks?.includes(networkId));
   },
   resetNetwork() {
-    if (!state$c.isDefaultCaipNetwork) {
-      state$c.caipNetwork = void 0;
+    if (!state$d.isDefaultCaipNetwork) {
+      state$d.caipNetwork = void 0;
     }
-    state$c.approvedCaipNetworkIds = void 0;
-    state$c.supportsAllNetworks = true;
-    state$c.smartAccountEnabledNetworks = [];
+    state$d.approvedCaipNetworkIds = void 0;
+    state$d.supportsAllNetworks = true;
+    state$d.smartAccountEnabledNetworks = [];
   },
   showUnsupportedChainUI() {
     setTimeout(() => {
@@ -1537,20 +1660,21 @@ const SwapApiUtil = {
     }
     return false;
   },
-  async getMyTokensWithBalance() {
+  async getMyTokensWithBalance(forceUpdate) {
     const address = AccountController.state.address;
     const caipNetwork = NetworkController.state.caipNetwork;
     if (!address || !caipNetwork) {
       return [];
     }
-    const response = await BlockchainApiController.getBalance(address, caipNetwork.id);
-    const balances = response.balances;
+    const response = await BlockchainApiController.getBalance(address, caipNetwork.id, forceUpdate);
+    const balances = response.balances.filter((balance) => balance.quantity.decimals !== "0");
+    AccountController.setTokenBalance(balances);
     return this.mapBalancesToSwapTokens(balances);
   },
   mapBalancesToSwapTokens(balances) {
     return balances?.map((token) => ({
       ...token,
-      address: token?.address ? token.address : `${token.chainId}:${ConstantsUtil$2.NATIVE_TOKEN_ADDRESS}`,
+      address: token?.address ? token.address : `${token.chainId}:${ConstantsUtil$3.NATIVE_TOKEN_ADDRESS}`,
       decimals: parseInt(token.quantity.decimals, 10),
       logoUri: token.iconUrl,
       eip2612: false
@@ -1558,21 +1682,21 @@ const SwapApiUtil = {
   }
 };
 
-const state$b = proxy({
+const state$c = proxy({
   view: "Connect",
   history: ["Connect"],
   transactionStack: []
 });
 const RouterController = {
-  state: state$b,
+  state: state$c,
   subscribeKey(key, callback) {
-    return subscribeKey(state$b, key, callback);
+    return subscribeKey(state$c, key, callback);
   },
   pushTransactionStack(action) {
-    state$b.transactionStack.push(action);
+    state$c.transactionStack.push(action);
   },
   popTransactionStack(cancel) {
-    const action = state$b.transactionStack.pop();
+    const action = state$c.transactionStack.pop();
     if (!action) {
       return;
     }
@@ -1589,38 +1713,38 @@ const RouterController = {
     }
   },
   push(view, data) {
-    if (view !== state$b.view) {
-      state$b.view = view;
-      state$b.history.push(view);
-      state$b.data = data;
+    if (view !== state$c.view) {
+      state$c.view = view;
+      state$c.history.push(view);
+      state$c.data = data;
     }
   },
   reset(view) {
-    state$b.view = view;
-    state$b.history = [view];
+    state$c.view = view;
+    state$c.history = [view];
   },
   replace(view, data) {
-    if (state$b.history.length >= 1 && state$b.history.at(-1) !== view) {
-      state$b.view = view;
-      state$b.history[state$b.history.length - 1] = view;
-      state$b.data = data;
+    if (state$c.history.length >= 1 && state$c.history.at(-1) !== view) {
+      state$c.view = view;
+      state$c.history[state$c.history.length - 1] = view;
+      state$c.data = data;
     }
   },
   goBack() {
-    if (state$b.history.length > 1) {
-      state$b.history.pop();
-      const [last] = state$b.history.slice(-1);
+    if (state$c.history.length > 1) {
+      state$c.history.pop();
+      const [last] = state$c.history.slice(-1);
       if (last) {
-        state$b.view = last;
+        state$c.view = last;
       }
     }
   },
   goBackToIndex(historyIndex) {
-    if (state$b.history.length > 1) {
-      state$b.history = state$b.history.slice(0, historyIndex + 1);
-      const [last] = state$b.history.slice(-1);
+    if (state$c.history.length > 1) {
+      state$c.history = state$c.history.slice(0, historyIndex + 1);
+      const [last] = state$c.history.slice(-1);
       if (last) {
-        state$b.view = last;
+        state$c.view = last;
       }
     }
   }
@@ -1638,10 +1762,10 @@ const SwapCalculationUtil = {
     const gasCostInUSD = networkPriceInUSD.multipliedBy(totalGasCostInEther);
     return gasCostInUSD.toNumber();
   },
-  getPriceImpact({ sourceTokenAmount, sourceTokenPriceInUSD, toTokenPriceInUSD, toTokenAmount, gasPriceInUSD }) {
-    const totalCostInUSD = NumberUtil.bigNumber(sourceTokenAmount).multipliedBy(sourceTokenPriceInUSD).plus(gasPriceInUSD);
-    const effectivePricePerToToken = totalCostInUSD.dividedBy(toTokenAmount);
-    const priceImpact = effectivePricePerToToken.minus(toTokenPriceInUSD).dividedBy(toTokenPriceInUSD).multipliedBy(100);
+  getPriceImpact({ sourceTokenAmount, sourceTokenPriceInUSD, toTokenPriceInUSD, toTokenAmount }) {
+    const inputValue = NumberUtil.bigNumber(sourceTokenAmount).multipliedBy(sourceTokenPriceInUSD);
+    const outputValue = NumberUtil.bigNumber(toTokenAmount).multipliedBy(toTokenPriceInUSD);
+    const priceImpact = inputValue.minus(outputValue).dividedBy(inputValue).multipliedBy(100);
     return priceImpact.toNumber();
   },
   getMaxSlippage(slippage, toTokenAmount) {
@@ -1692,6 +1816,7 @@ const SwapCalculationUtil = {
 };
 
 const INITIAL_GAS_LIMIT = 15e4;
+const TO_AMOUNT_DECIMALS = 6;
 const initialState = {
   initializing: false,
   initialized: false,
@@ -1712,48 +1837,48 @@ const initialState = {
   networkBalanceInUSD: "0",
   networkTokenSymbol: "",
   inputError: void 0,
-  slippage: ConstantsUtil$2.CONVERT_SLIPPAGE_TOLERANCE,
+  slippage: ConstantsUtil$3.CONVERT_SLIPPAGE_TOLERANCE,
   tokens: void 0,
   popularTokens: void 0,
   suggestedTokens: void 0,
   foundTokens: void 0,
   myTokensWithBalance: void 0,
   tokensPriceMap: {},
-  gasFee: BigInt(0),
+  gasFee: "0",
   gasPriceInUSD: 0,
   priceImpact: void 0,
   maxSlippage: void 0,
   providerFee: void 0
 };
-const state$a = proxy(initialState);
+const state$b = proxy(initialState);
 const SwapController = {
-  state: state$a,
+  state: state$b,
   subscribe(callback) {
-    return subscribe(state$a, () => callback(state$a));
+    return subscribe(state$b, () => callback(state$b));
   },
   subscribeKey(key, callback) {
-    return subscribeKey$1(state$a, key, callback);
+    return subscribeKey$1(state$b, key, callback);
   },
   getParams() {
     const { address } = AccountController.state;
-    const networkAddress = `${NetworkController.state.caipNetwork?.id}:${ConstantsUtil$2.NATIVE_TOKEN_ADDRESS}`;
+    const networkAddress = `${NetworkController.state.caipNetwork?.id}:${ConstantsUtil$3.NATIVE_TOKEN_ADDRESS}`;
     if (!address) {
       throw new Error("No address found to swap the tokens from.");
     }
     const caipAddress = AccountController.state.caipAddress;
-    const invalidToToken = !state$a.toToken?.address || !state$a.toToken?.decimals;
-    const invalidSourceToken = !state$a.sourceToken?.address || !state$a.sourceToken?.decimals || !NumberUtil.bigNumber(state$a.sourceTokenAmount).isGreaterThan(0);
-    const invalidSourceTokenAmount = !state$a.sourceTokenAmount;
+    const invalidToToken = !state$b.toToken?.address || !state$b.toToken?.decimals;
+    const invalidSourceToken = !state$b.sourceToken?.address || !state$b.sourceToken?.decimals || !NumberUtil.bigNumber(state$b.sourceTokenAmount).isGreaterThan(0);
+    const invalidSourceTokenAmount = !state$b.sourceTokenAmount;
     return {
       networkAddress,
       fromAddress: address,
       fromCaipAddress: AccountController.state.caipAddress,
-      sourceTokenAddress: state$a.sourceToken?.address,
-      toTokenAddress: state$a.toToken?.address,
-      toTokenAmount: state$a.toTokenAmount,
-      toTokenDecimals: state$a.toToken?.decimals,
-      sourceTokenAmount: state$a.sourceTokenAmount,
-      sourceTokenDecimals: state$a.sourceToken?.decimals,
+      sourceTokenAddress: state$b.sourceToken?.address,
+      toTokenAddress: state$b.toToken?.address,
+      toTokenAmount: state$b.toTokenAmount,
+      toTokenDecimals: state$b.toToken?.decimals,
+      sourceTokenAmount: state$b.sourceTokenAmount,
+      sourceTokenDecimals: state$b.sourceToken?.decimals,
       invalidToToken,
       invalidSourceToken,
       invalidSourceTokenAmount,
@@ -1761,60 +1886,60 @@ const SwapController = {
     };
   },
   setLoading(loading) {
-    state$a.loading = loading;
+    state$b.loading = loading;
   },
   setSourceToken(sourceToken) {
     if (!sourceToken) {
-      state$a.sourceToken = sourceToken;
-      state$a.sourceTokenAmount = "";
-      state$a.sourceTokenPriceInUSD = 0;
+      state$b.sourceToken = sourceToken;
+      state$b.sourceTokenAmount = "";
+      state$b.sourceTokenPriceInUSD = 0;
       return;
     }
-    state$a.sourceToken = sourceToken;
+    state$b.sourceToken = sourceToken;
     this.setTokenPrice(sourceToken.address, "sourceToken");
   },
   setSourceTokenAmount(amount) {
-    state$a.sourceTokenAmount = amount;
+    state$b.sourceTokenAmount = amount;
   },
   setToToken(toToken) {
     if (!toToken) {
-      state$a.toToken = toToken;
-      state$a.toTokenAmount = "";
-      state$a.toTokenPriceInUSD = 0;
+      state$b.toToken = toToken;
+      state$b.toTokenAmount = "";
+      state$b.toTokenPriceInUSD = 0;
       return;
     }
-    state$a.toToken = toToken;
+    state$b.toToken = toToken;
     this.setTokenPrice(toToken.address, "toToken");
   },
   setToTokenAmount(amount) {
-    state$a.toTokenAmount = amount;
+    state$b.toTokenAmount = amount ? NumberUtil.formatNumberToLocalString(amount, TO_AMOUNT_DECIMALS) : "";
   },
   async setTokenPrice(address, target) {
     const { availableToSwap } = this.getParams();
-    let price = state$a.tokensPriceMap[address] || 0;
+    let price = state$b.tokensPriceMap[address] || 0;
     if (!price) {
-      state$a.loadingPrices = true;
+      state$b.loadingPrices = true;
       price = await this.getAddressPrice(address);
     }
     if (target === "sourceToken") {
-      state$a.sourceTokenPriceInUSD = price;
+      state$b.sourceTokenPriceInUSD = price;
     } else if (target === "toToken") {
-      state$a.toTokenPriceInUSD = price;
+      state$b.toTokenPriceInUSD = price;
     }
-    if (state$a.loadingPrices) {
-      state$a.loadingPrices = false;
+    if (state$b.loadingPrices) {
+      state$b.loadingPrices = false;
       if (availableToSwap) {
         this.swapTokens();
       }
     }
   },
   switchTokens() {
-    if (state$a.initializing || !state$a.initialized) {
+    if (state$b.initializing || !state$b.initialized) {
       return;
     }
-    const newSourceToken = state$a.toToken ? { ...state$a.toToken } : void 0;
-    const newToToken = state$a.sourceToken ? { ...state$a.sourceToken } : void 0;
-    const newSourceTokenAmount = newSourceToken && state$a.toTokenAmount === "" ? "1" : state$a.toTokenAmount;
+    const newSourceToken = state$b.toToken ? { ...state$b.toToken } : void 0;
+    const newToToken = state$b.sourceToken ? { ...state$b.sourceToken } : void 0;
+    const newSourceTokenAmount = newSourceToken && state$b.toTokenAmount === "" ? "1" : state$b.toTokenAmount;
     this.setSourceToken(newSourceToken);
     this.setToToken(newToToken);
     this.setSourceTokenAmount(newSourceTokenAmount);
@@ -1822,62 +1947,62 @@ const SwapController = {
     this.swapTokens();
   },
   resetState() {
-    state$a.myTokensWithBalance = initialState.myTokensWithBalance;
-    state$a.tokensPriceMap = initialState.tokensPriceMap;
-    state$a.initialized = initialState.initialized;
-    state$a.sourceToken = initialState.sourceToken;
-    state$a.sourceTokenAmount = initialState.sourceTokenAmount;
-    state$a.sourceTokenPriceInUSD = initialState.sourceTokenPriceInUSD;
-    state$a.toToken = initialState.toToken;
-    state$a.toTokenAmount = initialState.toTokenAmount;
-    state$a.toTokenPriceInUSD = initialState.toTokenPriceInUSD;
-    state$a.networkPrice = initialState.networkPrice;
-    state$a.networkTokenSymbol = initialState.networkTokenSymbol;
-    state$a.networkBalanceInUSD = initialState.networkBalanceInUSD;
-    state$a.inputError = initialState.inputError;
+    state$b.myTokensWithBalance = initialState.myTokensWithBalance;
+    state$b.tokensPriceMap = initialState.tokensPriceMap;
+    state$b.initialized = initialState.initialized;
+    state$b.sourceToken = initialState.sourceToken;
+    state$b.sourceTokenAmount = initialState.sourceTokenAmount;
+    state$b.sourceTokenPriceInUSD = initialState.sourceTokenPriceInUSD;
+    state$b.toToken = initialState.toToken;
+    state$b.toTokenAmount = initialState.toTokenAmount;
+    state$b.toTokenPriceInUSD = initialState.toTokenPriceInUSD;
+    state$b.networkPrice = initialState.networkPrice;
+    state$b.networkTokenSymbol = initialState.networkTokenSymbol;
+    state$b.networkBalanceInUSD = initialState.networkBalanceInUSD;
+    state$b.inputError = initialState.inputError;
   },
   resetValues() {
     const { networkAddress } = this.getParams();
-    const networkToken = state$a.tokens?.find((token) => token.address === networkAddress);
+    const networkToken = state$b.tokens?.find((token) => token.address === networkAddress);
     this.setSourceToken(networkToken);
     this.setToToken(void 0);
   },
   clearError() {
-    state$a.transactionError = void 0;
+    state$b.transactionError = void 0;
   },
   async initializeState() {
-    if (state$a.initializing) {
+    if (state$b.initializing) {
       return;
     }
-    state$a.initializing = true;
-    if (!state$a.initialized) {
+    state$b.initializing = true;
+    if (!state$b.initialized) {
       try {
         await this.fetchTokens();
-        state$a.initialized = true;
+        state$b.initialized = true;
       } catch (error) {
-        state$a.initialized = false;
+        state$b.initialized = false;
         SnackController.showError("Failed to initialize swap");
         RouterController.goBack();
       }
     }
-    state$a.initializing = false;
+    state$b.initializing = false;
   },
   async fetchTokens() {
     const { networkAddress } = this.getParams();
     await this.getTokenList();
     await this.getNetworkTokenPrice();
     await this.getMyTokensWithBalance();
-    const networkToken = state$a.tokens?.find((token) => token.address === networkAddress);
+    const networkToken = state$b.tokens?.find((token) => token.address === networkAddress);
     if (networkToken) {
-      state$a.networkTokenSymbol = networkToken.symbol;
+      state$b.networkTokenSymbol = networkToken.symbol;
       this.setSourceToken(networkToken);
       this.setSourceTokenAmount("1");
     }
   },
   async getTokenList() {
     const tokens = await SwapApiUtil.getTokenList();
-    state$a.tokens = tokens;
-    state$a.popularTokens = tokens.sort((aTokenInfo, bTokenInfo) => {
+    state$b.tokens = tokens;
+    state$b.popularTokens = tokens.sort((aTokenInfo, bTokenInfo) => {
       if (aTokenInfo.symbol < bTokenInfo.symbol) {
         return -1;
       }
@@ -1886,20 +2011,20 @@ const SwapController = {
       }
       return 0;
     }).filter((token) => {
-      if (ConstantsUtil$2.SWAP_POPULAR_TOKENS.includes(token.symbol)) {
+      if (ConstantsUtil$3.SWAP_POPULAR_TOKENS.includes(token.symbol)) {
         return true;
       }
       return false;
     }, {});
-    state$a.suggestedTokens = tokens.filter((token) => {
-      if (ConstantsUtil$2.SWAP_SUGGESTED_TOKENS.includes(token.symbol)) {
+    state$b.suggestedTokens = tokens.filter((token) => {
+      if (ConstantsUtil$3.SWAP_SUGGESTED_TOKENS.includes(token.symbol)) {
         return true;
       }
       return false;
     }, {});
   },
   async getAddressPrice(address) {
-    const existPrice = state$a.tokensPriceMap[address];
+    const existPrice = state$b.tokensPriceMap[address];
     if (existPrice) {
       return existPrice;
     }
@@ -1908,11 +2033,11 @@ const SwapController = {
       addresses: [address]
     });
     const fungibles = response.fungibles || [];
-    const allTokens = [...state$a.tokens || [], ...state$a.myTokensWithBalance || []];
+    const allTokens = [...state$b.tokens || [], ...state$b.myTokensWithBalance || []];
     const symbol = allTokens?.find((token) => token.address === address)?.symbol;
-    const price = fungibles.find((p) => p.symbol.toLowerCase() === symbol?.toLowerCase())?.price || "0";
-    const priceAsFloat = parseFloat(price);
-    state$a.tokensPriceMap[address] = priceAsFloat;
+    const price = fungibles.find((p) => p.symbol.toLowerCase() === symbol?.toLowerCase())?.price || 0;
+    const priceAsFloat = parseFloat(price.toString());
+    state$b.tokensPriceMap[address] = priceAsFloat;
     return priceAsFloat;
   },
   async getNetworkTokenPrice() {
@@ -1922,13 +2047,13 @@ const SwapController = {
       addresses: [networkAddress]
     });
     const token = response.fungibles?.[0];
-    const price = token?.price || "0";
-    state$a.tokensPriceMap[networkAddress] = parseFloat(price);
-    state$a.networkTokenSymbol = token?.symbol || "";
-    state$a.networkPrice = price;
+    const price = token?.price.toString() || "0";
+    state$b.tokensPriceMap[networkAddress] = parseFloat(price);
+    state$b.networkTokenSymbol = token?.symbol || "";
+    state$b.networkPrice = price;
   },
-  async getMyTokensWithBalance() {
-    const balances = await SwapApiUtil.getMyTokensWithBalance();
+  async getMyTokensWithBalance(forceUpdate) {
+    const balances = await SwapApiUtil.getMyTokensWithBalance(forceUpdate);
     if (!balances) {
       return;
     }
@@ -1943,10 +2068,10 @@ const SwapController = {
     }
     const networkToken = balances.find((token) => token.address === networkAddress);
     balances.forEach((token) => {
-      state$a.tokensPriceMap[token.address] = token.price || 0;
+      state$b.tokensPriceMap[token.address] = token.price || 0;
     });
-    state$a.myTokensWithBalance = balances.filter((token) => token.address.startsWith(caipNetwork.id));
-    state$a.networkBalanceInUSD = networkToken ? NumberUtil.multiply(networkToken.quantity.numeric, networkToken.price).toString() : "0";
+    state$b.myTokensWithBalance = balances.filter((token) => token.address.startsWith(caipNetwork.id));
+    state$b.networkBalanceInUSD = networkToken ? NumberUtil.multiply(networkToken.quantity.numeric, networkToken.price).toString() : "0";
   },
   async getInitialGasPrice() {
     const res = await SwapApiUtil.fetchGasPrice();
@@ -1956,48 +2081,57 @@ const SwapController = {
     const value = res.standard;
     const gasFee = BigInt(value);
     const gasLimit = BigInt(INITIAL_GAS_LIMIT);
-    const gasPrice = SwapCalculationUtil.getGasPriceInUSD(state$a.networkPrice, gasLimit, gasFee);
-    state$a.gasPriceInUSD = gasPrice;
-    return { gasPrice: gasFee, gasPriceInUSD: state$a.gasPriceInUSD };
+    const gasPrice = SwapCalculationUtil.getGasPriceInUSD(state$b.networkPrice, gasLimit, gasFee);
+    state$b.gasFee = value;
+    state$b.gasPriceInUSD = gasPrice;
+    return { gasPrice: gasFee, gasPriceInUSD: state$b.gasPriceInUSD };
   },
   async swapTokens() {
-    const sourceToken = state$a.sourceToken;
-    const toToken = state$a.toToken;
-    const haveSourceTokenAmount = NumberUtil.bigNumber(state$a.sourceTokenAmount).isGreaterThan(0);
-    if (!toToken || !sourceToken || state$a.loadingPrices || !haveSourceTokenAmount) {
+    const address = AccountController.state.address;
+    const sourceToken = state$b.sourceToken;
+    const toToken = state$b.toToken;
+    const haveSourceTokenAmount = NumberUtil.bigNumber(state$b.sourceTokenAmount).isGreaterThan(0);
+    if (!toToken || !sourceToken || state$b.loadingPrices || !haveSourceTokenAmount) {
       return;
     }
-    state$a.loading = true;
-    state$a.toTokenAmount = SwapCalculationUtil.getToTokenAmount({
-      sourceToken: state$a.sourceToken,
-      toToken: state$a.toToken,
-      sourceTokenPrice: state$a.sourceTokenPriceInUSD,
-      toTokenPrice: state$a.toTokenPriceInUSD,
-      sourceTokenAmount: state$a.sourceTokenAmount
+    state$b.loading = true;
+    const amountDecimal = NumberUtil.bigNumber(state$b.sourceTokenAmount).multipliedBy(10 ** sourceToken.decimals);
+    const quoteResponse = await BlockchainApiController.fetchSwapQuote({
+      userAddress: address,
+      projectId: OptionsController.state.projectId,
+      from: sourceToken.address,
+      to: toToken.address,
+      gasPrice: state$b.gasFee,
+      amount: amountDecimal.toString()
     });
-    const isInsufficientToken = this.hasInsufficientToken(state$a.sourceTokenAmount, sourceToken.address);
-    if (isInsufficientToken) {
-      state$a.inputError = "Insufficient balance";
-    } else {
-      state$a.inputError = void 0;
-      const transaction = await this.getTransaction();
-      this.setTransactionDetails(transaction);
+    const quoteToAmount = quoteResponse?.quotes?.[0]?.toAmount;
+    if (!quoteToAmount) {
+      return;
     }
-    state$a.loading = false;
+    const toTokenAmount = NumberUtil.bigNumber(quoteToAmount).dividedBy(10 ** toToken.decimals).toString();
+    this.setToTokenAmount(toTokenAmount);
+    const isInsufficientToken = this.hasInsufficientToken(state$b.sourceTokenAmount, sourceToken.address);
+    if (isInsufficientToken) {
+      state$b.inputError = "Insufficient balance";
+    } else {
+      state$b.inputError = void 0;
+      this.setTransactionDetails();
+    }
+    state$b.loading = false;
   },
   async getTransaction() {
     const { fromCaipAddress, availableToSwap } = this.getParams();
-    const sourceToken = state$a.sourceToken;
-    const toToken = state$a.toToken;
-    if (!fromCaipAddress || !availableToSwap || !sourceToken || !toToken || !state$a.loading) {
+    const sourceToken = state$b.sourceToken;
+    const toToken = state$b.toToken;
+    if (!fromCaipAddress || !availableToSwap || !sourceToken || !toToken || state$b.loading) {
       return void 0;
     }
     try {
-      state$a.loading = true;
+      state$b.loading = true;
       const hasAllowance = await SwapApiUtil.fetchSwapAllowance({
         userAddress: fromCaipAddress,
         tokenAddress: sourceToken.address,
-        sourceTokenAmount: state$a.sourceTokenAmount,
+        sourceTokenAmount: state$b.sourceTokenAmount,
         sourceTokenDecimals: sourceToken.decimals
       });
       let transaction = void 0;
@@ -2006,14 +2140,15 @@ const SwapController = {
       } else {
         transaction = await this.createAllowanceTransaction();
       }
-      state$a.loading = false;
-      state$a.fetchError = false;
+      state$b.loading = false;
+      state$b.fetchError = false;
       return transaction;
     } catch (error) {
+      RouterController.goBack();
       SnackController.showError("Failed to check allowance");
-      state$a.approvalTransaction = void 0;
-      state$a.swapTransaction = void 0;
-      state$a.fetchError = true;
+      state$b.approvalTransaction = void 0;
+      state$b.swapTransaction = void 0;
+      state$b.fetchError = true;
       return void 0;
     }
   },
@@ -2043,23 +2178,24 @@ const SwapController = {
         gas: gasLimit,
         gasPrice: BigInt(response.tx.eip155.gasPrice),
         value: BigInt(response.tx.value),
-        toAmount: state$a.toTokenAmount
+        toAmount: state$b.toTokenAmount
       };
-      state$a.swapTransaction = void 0;
-      state$a.approvalTransaction = transaction;
+      state$b.swapTransaction = void 0;
+      state$b.approvalTransaction = transaction;
       return transaction;
     } catch (error) {
+      RouterController.goBack();
       SnackController.showError("Failed to create approval transaction");
-      state$a.approvalTransaction = void 0;
-      state$a.swapTransaction = void 0;
-      state$a.fetchError = true;
+      state$b.approvalTransaction = void 0;
+      state$b.swapTransaction = void 0;
+      state$b.fetchError = true;
       return void 0;
     }
   },
   async createSwapTransaction() {
     const { networkAddress, fromCaipAddress, sourceTokenAmount } = this.getParams();
-    const sourceToken = state$a.sourceToken;
-    const toToken = state$a.toToken;
+    const sourceToken = state$b.sourceToken;
+    const toToken = state$b.toToken;
     if (!fromCaipAddress || !sourceTokenAmount || !sourceToken || !toToken) {
       return void 0;
     }
@@ -2081,22 +2217,24 @@ const SwapController = {
         gas,
         gasPrice,
         value: isSourceTokenIsNetworkToken ? BigInt(amount) : BigInt("0"),
-        toAmount: state$a.toTokenAmount
+        toAmount: state$b.toTokenAmount
       };
-      state$a.gasPriceInUSD = SwapCalculationUtil.getGasPriceInUSD(state$a.networkPrice, gas, gasPrice);
-      state$a.approvalTransaction = void 0;
-      state$a.swapTransaction = transaction;
+      state$b.gasPriceInUSD = SwapCalculationUtil.getGasPriceInUSD(state$b.networkPrice, gas, gasPrice);
+      state$b.approvalTransaction = void 0;
+      state$b.swapTransaction = transaction;
       return transaction;
     } catch (error) {
-      state$a.approvalTransaction = void 0;
-      state$a.swapTransaction = void 0;
-      state$a.fetchError = true;
+      RouterController.goBack();
+      SnackController.showError("Failed to create transaction");
+      state$b.approvalTransaction = void 0;
+      state$b.swapTransaction = void 0;
+      state$b.fetchError = true;
       return void 0;
     }
   },
   async sendTransactionForApproval(data) {
     const { fromAddress } = this.getParams();
-    state$a.transactionLoading = true;
+    state$b.transactionLoading = true;
     RouterController.pushTransactionStack({
       view: null,
       goBack: true
@@ -2109,13 +2247,13 @@ const SwapController = {
         value: BigInt(data.value),
         gasPrice: BigInt(data.gasPrice)
       });
-      state$a.approvalTransaction = void 0;
-      state$a.transactionLoading = false;
+      state$b.approvalTransaction = void 0;
+      state$b.transactionLoading = false;
       this.swapTokens();
     } catch (err) {
       const error = err;
-      state$a.transactionError = error?.shortMessage;
-      state$a.transactionLoading = false;
+      state$b.transactionError = error?.shortMessage;
+      state$b.transactionLoading = false;
     }
   },
   async sendTransactionForSwap(data) {
@@ -2123,7 +2261,7 @@ const SwapController = {
       return void 0;
     }
     const { fromAddress, toTokenAmount } = this.getParams();
-    state$a.transactionLoading = true;
+    state$b.transactionLoading = true;
     RouterController.pushTransactionStack({
       view: "Account",
       goBack: false,
@@ -2132,7 +2270,8 @@ const SwapController = {
       }
     });
     try {
-      const successMessage = `Swapped ${state$a.sourceToken?.symbol} to ${NumberUtil.formatNumberToLocalString(toTokenAmount, 3)} ${state$a.toToken?.symbol}!`;
+      const successMessage = `Swapped ${state$b.sourceToken?.symbol} to ${NumberUtil.formatNumberToLocalString(toTokenAmount, 3)} ${state$b.toToken?.symbol}!`;
+      const forceUpdateAddresses = [state$b.sourceToken?.address, state$b.toToken?.address].join(",");
       const transactionHash = await ConnectionController.sendTransaction({
         address: fromAddress,
         to: data.to,
@@ -2141,104 +2280,104 @@ const SwapController = {
         gasPrice: BigInt(data.gasPrice),
         value: data.value
       });
-      state$a.transactionLoading = false;
+      state$b.transactionLoading = false;
       SnackController.showSuccess(successMessage);
       SwapController.resetState();
-      SwapController.getMyTokensWithBalance();
+      SwapController.getMyTokensWithBalance(forceUpdateAddresses);
       return transactionHash;
     } catch (err) {
       const error = err;
-      state$a.transactionError = error?.shortMessage;
-      state$a.transactionLoading = false;
+      state$b.transactionError = error?.shortMessage;
+      state$b.transactionLoading = false;
       SnackController.showError(error?.shortMessage || "Transaction error");
       return void 0;
     }
   },
   hasInsufficientToken(sourceTokenAmount, sourceTokenAddress) {
-    const isInsufficientSourceTokenForSwap = SwapCalculationUtil.isInsufficientSourceTokenForSwap(sourceTokenAmount, sourceTokenAddress, state$a.myTokensWithBalance);
-    const insufficientNetworkTokenForGas = SwapCalculationUtil.isInsufficientNetworkTokenForGas(state$a.networkBalanceInUSD, state$a.gasPriceInUSD);
+    const isInsufficientSourceTokenForSwap = SwapCalculationUtil.isInsufficientSourceTokenForSwap(sourceTokenAmount, sourceTokenAddress, state$b.myTokensWithBalance);
+    const insufficientNetworkTokenForGas = SwapCalculationUtil.isInsufficientNetworkTokenForGas(state$b.networkBalanceInUSD, state$b.gasPriceInUSD);
     return insufficientNetworkTokenForGas || isInsufficientSourceTokenForSwap;
   },
-  setTransactionDetails(transaction) {
+  setTransactionDetails() {
     const { toTokenAddress, toTokenDecimals } = this.getParams();
-    if (!transaction || !toTokenAddress || !toTokenDecimals) {
+    if (!toTokenAddress || !toTokenDecimals) {
       return;
     }
-    state$a.gasPriceInUSD = SwapCalculationUtil.getGasPriceInUSD(state$a.networkPrice, transaction.gas, transaction.gasPrice);
-    state$a.priceImpact = SwapCalculationUtil.getPriceImpact({
-      sourceTokenAmount: state$a.sourceTokenAmount,
-      sourceTokenPriceInUSD: state$a.sourceTokenPriceInUSD,
-      toTokenPriceInUSD: state$a.toTokenPriceInUSD,
-      toTokenAmount: state$a.toTokenAmount,
-      gasPriceInUSD: state$a.gasPriceInUSD
+    state$b.gasPriceInUSD = SwapCalculationUtil.getGasPriceInUSD(state$b.networkPrice, BigInt(state$b.gasFee), BigInt(INITIAL_GAS_LIMIT));
+    state$b.priceImpact = SwapCalculationUtil.getPriceImpact({
+      sourceTokenAmount: state$b.sourceTokenAmount,
+      sourceTokenPriceInUSD: state$b.sourceTokenPriceInUSD,
+      toTokenPriceInUSD: state$b.toTokenPriceInUSD,
+      toTokenAmount: state$b.toTokenAmount
     });
-    state$a.maxSlippage = SwapCalculationUtil.getMaxSlippage(state$a.slippage, state$a.toTokenAmount);
-    state$a.providerFee = SwapCalculationUtil.getProviderFee(state$a.sourceTokenAmount);
+    state$b.maxSlippage = SwapCalculationUtil.getMaxSlippage(state$b.slippage, state$b.toTokenAmount);
+    state$b.providerFee = SwapCalculationUtil.getProviderFee(state$b.sourceTokenAmount);
   }
 };
 
-const state$9 = proxy({
+const state$a = proxy({
   isConnected: false,
   currentTab: 0,
   tokenBalance: [],
   smartAccountDeployed: false
 });
 const AccountController = {
-  state: state$9,
+  state: state$a,
   subscribe(callback) {
-    return subscribe(state$9, () => callback(state$9));
+    return subscribe(state$a, () => callback(state$a));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$9, key, callback);
+    return subscribeKey(state$a, key, callback);
   },
   setIsConnected(isConnected) {
-    state$9.isConnected = isConnected;
+    state$a.isConnected = isConnected;
   },
   setCaipAddress(caipAddress) {
-    state$9.caipAddress = caipAddress;
-    state$9.address = caipAddress ? CoreHelperUtil.getPlainAddress(caipAddress) : void 0;
+    state$a.caipAddress = caipAddress;
+    state$a.address = caipAddress ? CoreHelperUtil.getPlainAddress(caipAddress) : void 0;
   },
   setBalance(balance, balanceSymbol) {
-    state$9.balance = balance;
-    state$9.balanceSymbol = balanceSymbol;
+    state$a.balance = balance;
+    state$a.balanceSymbol = balanceSymbol;
   },
   setProfileName(profileName) {
-    state$9.profileName = profileName;
+    state$a.profileName = profileName;
   },
   setProfileImage(profileImage) {
-    state$9.profileImage = profileImage;
+    state$a.profileImage = profileImage;
   },
   setAddressExplorerUrl(explorerUrl) {
-    state$9.addressExplorerUrl = explorerUrl;
+    state$a.addressExplorerUrl = explorerUrl;
   },
   setSmartAccountDeployed(isDeployed) {
-    state$9.smartAccountDeployed = isDeployed;
+    state$a.smartAccountDeployed = isDeployed;
   },
   setCurrentTab(currentTab) {
-    state$9.currentTab = currentTab;
+    state$a.currentTab = currentTab;
   },
   setTokenBalance(tokenBalance) {
     if (tokenBalance) {
-      state$9.tokenBalance = ref(tokenBalance);
+      state$a.tokenBalance = ref(tokenBalance);
     }
   },
   setConnectedWalletInfo(connectedWalletInfo) {
-    state$9.connectedWalletInfo = connectedWalletInfo;
+    state$a.connectedWalletInfo = connectedWalletInfo;
   },
   setPreferredAccountType(preferredAccountType) {
-    state$9.preferredAccountType = preferredAccountType;
+    state$a.preferredAccountType = preferredAccountType;
   },
   setSocialProvider(socialProvider) {
     if (socialProvider) {
-      state$9.socialProvider = socialProvider;
+      state$a.socialProvider = socialProvider;
     }
   },
   async fetchTokenBalance() {
     const chainId = NetworkController.state.caipNetwork?.id;
     try {
-      if (state$9.address && chainId) {
-        const response = await BlockchainApiController.getBalance(state$9.address, chainId);
-        this.setTokenBalance(response.balances);
+      if (state$a.address && chainId) {
+        const response = await BlockchainApiController.getBalance(state$a.address, chainId);
+        const filteredBalances = response.balances.filter((balance) => balance.quantity.decimals !== "0");
+        this.setTokenBalance(filteredBalances);
         SwapController.setBalances(SwapApiUtil.mapBalancesToSwapTokens(response.balances));
       }
     } catch (error) {
@@ -2246,24 +2385,24 @@ const AccountController = {
     }
   },
   resetAccount() {
-    state$9.isConnected = false;
-    state$9.smartAccountDeployed = false;
-    state$9.currentTab = 0;
-    state$9.caipAddress = void 0;
-    state$9.address = void 0;
-    state$9.balance = void 0;
-    state$9.balanceSymbol = void 0;
-    state$9.profileName = void 0;
-    state$9.profileImage = void 0;
-    state$9.addressExplorerUrl = void 0;
-    state$9.tokenBalance = [];
-    state$9.connectedWalletInfo = void 0;
-    state$9.preferredAccountType = void 0;
-    state$9.socialProvider = void 0;
+    state$a.isConnected = false;
+    state$a.smartAccountDeployed = false;
+    state$a.currentTab = 0;
+    state$a.caipAddress = void 0;
+    state$a.address = void 0;
+    state$a.balance = void 0;
+    state$a.balanceSymbol = void 0;
+    state$a.profileName = void 0;
+    state$a.profileImage = void 0;
+    state$a.addressExplorerUrl = void 0;
+    state$a.tokenBalance = [];
+    state$a.connectedWalletInfo = void 0;
+    state$a.preferredAccountType = void 0;
+    state$a.socialProvider = void 0;
   }
 };
 
-const state$8 = proxy({
+const state$9 = proxy({
   walletImages: {},
   networkImages: {},
   connectorImages: {},
@@ -2271,45 +2410,45 @@ const state$8 = proxy({
   currencyImages: {}
 });
 const AssetController = {
-  state: state$8,
+  state: state$9,
   subscribeNetworkImages(callback) {
-    return subscribe(state$8.networkImages, () => callback(state$8.networkImages));
+    return subscribe(state$9.networkImages, () => callback(state$9.networkImages));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$8, key, callback);
+    return subscribeKey(state$9, key, callback);
   },
   subscribe(callback) {
-    return subscribe(state$8, () => callback(state$8));
+    return subscribe(state$9, () => callback(state$9));
   },
   setWalletImage(key, value) {
-    state$8.walletImages[key] = value;
+    state$9.walletImages[key] = value;
   },
   setNetworkImage(key, value) {
-    state$8.networkImages[key] = value;
+    state$9.networkImages[key] = value;
   },
   setConnectorImage(key, value) {
-    state$8.connectorImages[key] = value;
+    state$9.connectorImages[key] = value;
   },
   setTokenImage(key, value) {
-    state$8.tokenImages[key] = value;
+    state$9.tokenImages[key] = value;
   },
   setCurrencyImage(key, value) {
-    state$8.currencyImages[key] = value;
+    state$9.currencyImages[key] = value;
   }
 };
 
-const state$7 = proxy({
+const state$8 = proxy({
   themeMode: "dark",
   themeVariables: {},
   w3mThemeVariables: void 0
 });
 const ThemeController = {
-  state: state$7,
+  state: state$8,
   subscribe(callback) {
-    return subscribe(state$7, () => callback(state$7));
+    return subscribe(state$8, () => callback(state$8));
   },
   setThemeMode(themeMode) {
-    state$7.themeMode = themeMode;
+    state$8.themeMode = themeMode;
     try {
       const authConnector = ConnectorController.getAuthConnector();
       if (authConnector) {
@@ -2321,42 +2460,42 @@ const ThemeController = {
         });
       }
     } catch {
-      console.info("Unable to sync theme to email connector");
+      console.info("Unable to sync theme to auth connector");
     }
   },
   setThemeVariables(themeVariables) {
-    state$7.themeVariables = { ...state$7.themeVariables, ...themeVariables };
+    state$8.themeVariables = { ...state$8.themeVariables, ...themeVariables };
     try {
       const authConnector = ConnectorController.getAuthConnector();
       if (authConnector) {
         const themeVariablesSnapshot = ThemeController.getSnapshot().themeVariables;
         authConnector.provider.syncTheme({
           themeVariables: themeVariablesSnapshot,
-          w3mThemeVariables: getW3mThemeVariables(state$7.themeVariables, state$7.themeMode)
+          w3mThemeVariables: getW3mThemeVariables(state$8.themeVariables, state$8.themeMode)
         });
       }
     } catch {
-      console.info("Unable to sync theme to email connector");
+      console.info("Unable to sync theme to auth connector");
     }
   },
   getSnapshot() {
-    return snapshot(state$7);
+    return snapshot(state$8);
   }
 };
 
-const state$6 = proxy({
+const state$7 = proxy({
   connectors: []
 });
 const ConnectorController = {
-  state: state$6,
+  state: state$7,
   subscribeKey(key, callback) {
-    return subscribeKey(state$6, key, callback);
+    return subscribeKey(state$7, key, callback);
   },
   setConnectors(connectors) {
-    state$6.connectors = connectors.map((c) => ref(c));
+    state$7.connectors = connectors.map((c) => ref(c));
   },
   addConnector(connector) {
-    state$6.connectors.push(ref(connector));
+    state$7.connectors.push(ref(connector));
     if (connector.id === "w3mAuth") {
       const authConnector = connector;
       const optionsState = snapshot(OptionsController.state);
@@ -2375,16 +2514,16 @@ const ConnectorController = {
     }
   },
   getAuthConnector() {
-    return state$6.connectors.find((c) => c.type === "AUTH");
+    return state$7.connectors.find((c) => c.type === "AUTH");
   },
   getAnnouncedConnectorRdns() {
-    return state$6.connectors.filter((c) => c.type === "ANNOUNCED").map((c) => c.info?.rdns);
+    return state$7.connectors.filter((c) => c.type === "ANNOUNCED").map((c) => c.info?.rdns);
   },
   getConnectors() {
-    return state$6.connectors;
+    return state$7.connectors;
   },
   getConnector(id, rdns) {
-    return state$6.connectors.find((c) => c.explorerId === id || c.info?.rdns === rdns);
+    return state$7.connectors.find((c) => c.explorerId === id || c.info?.rdns === rdns);
   }
 };
 
@@ -2392,7 +2531,7 @@ const baseUrl = CoreHelperUtil.getApiUrl();
 const api = new FetchUtil({ baseUrl });
 const entries = "40";
 const recommendedEntries = "4";
-const state$5 = proxy({
+const state$6 = proxy({
   page: 1,
   count: 0,
   featured: [],
@@ -2402,9 +2541,9 @@ const state$5 = proxy({
   isAnalyticsEnabled: false
 });
 const ApiController = {
-  state: state$5,
+  state: state$6,
   subscribeKey(key, callback) {
-    return subscribeKey(state$5, key, callback);
+    return subscribeKey(state$6, key, callback);
   },
   _getApiHeaders() {
     const { projectId, sdkType, sdkVersion } = OptionsController.state;
@@ -2472,7 +2611,7 @@ const ApiController = {
       data.sort((a, b) => featuredWalletIds.indexOf(a.id) - featuredWalletIds.indexOf(b.id));
       const images = data.map((d) => d.image_id).filter(Boolean);
       await Promise.allSettled(images.map((id) => ApiController._fetchWalletImage(id)));
-      state$5.featured = data;
+      state$6.featured = data;
     }
   },
   async fetchRecommendedWallets() {
@@ -2493,13 +2632,13 @@ const ApiController = {
     const recommendedImages = data.map((d) => d.image_id).filter(Boolean);
     const recentImages = recent.map((r) => r.image_id).filter(Boolean);
     await Promise.allSettled([...recommendedImages, ...recentImages].map((id) => ApiController._fetchWalletImage(id)));
-    state$5.recommended = data;
-    state$5.count = count ?? 0;
+    state$6.recommended = data;
+    state$6.count = count ?? 0;
   },
   async fetchWallets({ page }) {
     const { includeWalletIds, excludeWalletIds, featuredWalletIds } = OptionsController.state;
     const exclude = [
-      ...state$5.recommended.map(({ id }) => id),
+      ...state$6.recommended.map(({ id }) => id),
       ...excludeWalletIds ?? [],
       ...featuredWalletIds ?? []
     ].filter(Boolean);
@@ -2519,13 +2658,13 @@ const ApiController = {
       ...images.map((id) => ApiController._fetchWalletImage(id)),
       CoreHelperUtil.wait(300)
     ]);
-    state$5.wallets = [...state$5.wallets, ...data];
-    state$5.count = count > state$5.count ? count : state$5.count;
-    state$5.page = page;
+    state$6.wallets = [...state$6.wallets, ...data];
+    state$6.count = count > state$6.count ? count : state$6.count;
+    state$6.page = page;
   },
   async searchWallet({ search }) {
     const { includeWalletIds, excludeWalletIds } = OptionsController.state;
-    state$5.search = [];
+    state$6.search = [];
     const { data } = await api.get({
       path: "/getWallets",
       headers: ApiController._getApiHeaders(),
@@ -2543,11 +2682,11 @@ const ApiController = {
       ...images.map((id) => ApiController._fetchWalletImage(id)),
       CoreHelperUtil.wait(300)
     ]);
-    state$5.search = data;
+    state$6.search = data;
   },
   async reFetchWallets() {
-    state$5.page = 1;
-    state$5.wallets = [];
+    state$6.page = 1;
+    state$6.wallets = [];
     await ApiController.fetchFeaturedWallets();
     await ApiController.fetchRecommendedWallets();
   },
@@ -2561,7 +2700,7 @@ const ApiController = {
     if (OptionsController.state.enableAnalytics === void 0) {
       promises.push(ApiController.fetchAnalyticsConfig());
     }
-    state$5.prefetchPromise = Promise.race([Promise.allSettled(promises), CoreHelperUtil.wait(3e3)]);
+    state$6.prefetchPromise = Promise.race([Promise.allSettled(promises), CoreHelperUtil.wait(3e3)]);
   },
   async fetchAnalyticsConfig() {
     const { isAnalyticsEnabled } = await api.get({
@@ -2572,17 +2711,17 @@ const ApiController = {
   }
 };
 
-const state$4 = proxy({
+const state$5 = proxy({
   loading: false,
   open: false
 });
 const ModalController = {
-  state: state$4,
+  state: state$5,
   subscribe(callback) {
-    return subscribe(state$4, () => callback(state$4));
+    return subscribe(state$5, () => callback(state$5));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$4, key, callback);
+    return subscribeKey(state$5, key, callback);
   },
   async open(options) {
     await ApiController.state.prefetchPromise;
@@ -2594,7 +2733,7 @@ const ModalController = {
     } else {
       RouterController.reset("Connect");
     }
-    state$4.open = true;
+    state$5.open = true;
     PublicStateController.set({ open: true });
     EventsController.sendEvent({
       type: "track",
@@ -2604,7 +2743,7 @@ const ModalController = {
   },
   close() {
     const connected = AccountController.state.isConnected;
-    state$4.open = false;
+    state$5.open = false;
     PublicStateController.set({ open: false });
     EventsController.sendEvent({
       type: "track",
@@ -2613,7 +2752,7 @@ const ModalController = {
     });
   },
   setLoading(loading) {
-    state$4.loading = loading;
+    state$5.loading = loading;
     PublicStateController.set({ loading });
   }
 };
@@ -2662,23 +2801,23 @@ const defaultState = {
   paymentCurrencies: [],
   quotesLoading: false
 };
-const state$3 = proxy(defaultState);
+const state$4 = proxy(defaultState);
 const OnRampController = {
-  state: state$3,
+  state: state$4,
   subscribe(callback) {
-    return subscribe(state$3, () => callback(state$3));
+    return subscribe(state$4, () => callback(state$4));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$3, key, callback);
+    return subscribeKey(state$4, key, callback);
   },
   setSelectedProvider(provider) {
-    state$3.selectedProvider = provider;
+    state$4.selectedProvider = provider;
   },
   setPurchaseCurrency(currency) {
-    state$3.purchaseCurrency = currency;
+    state$4.purchaseCurrency = currency;
   },
   setPaymentCurrency(currency) {
-    state$3.paymentCurrency = currency;
+    state$4.paymentCurrency = currency;
   },
   setPurchaseAmount(amount) {
     this.state.purchaseAmount = amount;
@@ -2688,83 +2827,83 @@ const OnRampController = {
   },
   async getAvailableCurrencies() {
     const options = await BlockchainApiController.getOnrampOptions();
-    state$3.purchaseCurrencies = options.purchaseCurrencies;
-    state$3.paymentCurrencies = options.paymentCurrencies;
-    state$3.paymentCurrency = options.paymentCurrencies[0] || USD_CURRENCY_DEFAULT;
-    state$3.purchaseCurrency = options.purchaseCurrencies[0] || USDC_CURRENCY_DEFAULT;
+    state$4.purchaseCurrencies = options.purchaseCurrencies;
+    state$4.paymentCurrencies = options.paymentCurrencies;
+    state$4.paymentCurrency = options.paymentCurrencies[0] || USD_CURRENCY_DEFAULT;
+    state$4.purchaseCurrency = options.purchaseCurrencies[0] || USDC_CURRENCY_DEFAULT;
     await ApiController.fetchCurrencyImages(options.paymentCurrencies.map((currency) => currency.id));
     await ApiController.fetchTokenImages(options.purchaseCurrencies.map((currency) => currency.symbol));
   },
   async getQuote() {
-    state$3.quotesLoading = true;
+    state$4.quotesLoading = true;
     try {
       const quote = await BlockchainApiController.getOnrampQuote({
-        purchaseCurrency: state$3.purchaseCurrency,
-        paymentCurrency: state$3.paymentCurrency,
-        amount: state$3.paymentAmount?.toString() || "0",
-        network: state$3.purchaseCurrency?.symbol
+        purchaseCurrency: state$4.purchaseCurrency,
+        paymentCurrency: state$4.paymentCurrency,
+        amount: state$4.paymentAmount?.toString() || "0",
+        network: state$4.purchaseCurrency?.symbol
       });
-      state$3.quotesLoading = false;
-      state$3.purchaseAmount = Number(quote.purchaseAmount.amount);
+      state$4.quotesLoading = false;
+      state$4.purchaseAmount = Number(quote.purchaseAmount.amount);
       return quote;
     } catch (error) {
-      state$3.error = error.message;
-      state$3.quotesLoading = false;
+      state$4.error = error.message;
+      state$4.quotesLoading = false;
       return null;
     } finally {
-      state$3.quotesLoading = false;
+      state$4.quotesLoading = false;
     }
   },
   resetState() {
-    state$3.providers = ONRAMP_PROVIDERS;
-    state$3.selectedProvider = null;
-    state$3.error = null;
-    state$3.purchaseCurrency = USDC_CURRENCY_DEFAULT;
-    state$3.paymentCurrency = USD_CURRENCY_DEFAULT;
-    state$3.purchaseCurrencies = [USDC_CURRENCY_DEFAULT];
-    state$3.paymentCurrencies = [];
-    state$3.paymentAmount = void 0;
-    state$3.purchaseAmount = void 0;
-    state$3.quotesLoading = false;
+    state$4.providers = ONRAMP_PROVIDERS;
+    state$4.selectedProvider = null;
+    state$4.error = null;
+    state$4.purchaseCurrency = USDC_CURRENCY_DEFAULT;
+    state$4.paymentCurrency = USD_CURRENCY_DEFAULT;
+    state$4.purchaseCurrencies = [USDC_CURRENCY_DEFAULT];
+    state$4.paymentCurrencies = [];
+    state$4.paymentAmount = void 0;
+    state$4.purchaseAmount = void 0;
+    state$4.quotesLoading = false;
   }
 };
 
-const state$2 = proxy({
+const state$3 = proxy({
   loading: false
 });
 const SendController = {
-  state: state$2,
+  state: state$3,
   subscribe(callback) {
-    return subscribe(state$2, () => callback(state$2));
+    return subscribe(state$3, () => callback(state$3));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$2, key, callback);
+    return subscribeKey(state$3, key, callback);
   },
   setToken(token) {
     if (token) {
-      state$2.token = ref(token);
+      state$3.token = ref(token);
     }
   },
   setTokenAmount(sendTokenAmount) {
-    state$2.sendTokenAmount = sendTokenAmount;
+    state$3.sendTokenAmount = sendTokenAmount;
   },
   setReceiverAddress(receiverAddress) {
-    state$2.receiverAddress = receiverAddress;
+    state$3.receiverAddress = receiverAddress;
   },
   setReceiverProfileImageUrl(receiverProfileImageUrl) {
-    state$2.receiverProfileImageUrl = receiverProfileImageUrl;
+    state$3.receiverProfileImageUrl = receiverProfileImageUrl;
   },
   setReceiverProfileName(receiverProfileName) {
-    state$2.receiverProfileName = receiverProfileName;
+    state$3.receiverProfileName = receiverProfileName;
   },
   setGasPrice(gasPrice) {
-    state$2.gasPrice = gasPrice;
+    state$3.gasPrice = gasPrice;
   },
   setGasPriceInUsd(gasPriceInUSD) {
-    state$2.gasPriceInUSD = gasPriceInUSD;
+    state$3.gasPriceInUSD = gasPriceInUSD;
   },
   setLoading(loading) {
-    state$2.loading = loading;
+    state$3.loading = loading;
   },
   sendToken() {
     if (this.state.token?.address && this.state.sendTokenAmount && this.state.receiverAddress) {
@@ -2830,16 +2969,16 @@ const SendController = {
     }
   },
   resetSend() {
-    state$2.token = void 0;
-    state$2.sendTokenAmount = void 0;
-    state$2.receiverAddress = void 0;
-    state$2.receiverProfileImageUrl = void 0;
-    state$2.receiverProfileName = void 0;
-    state$2.loading = false;
+    state$3.token = void 0;
+    state$3.sendTokenAmount = void 0;
+    state$3.receiverAddress = void 0;
+    state$3.receiverProfileImageUrl = void 0;
+    state$3.receiverProfileName = void 0;
+    state$3.loading = false;
   }
 };
 
-const state$1 = proxy({
+const state$2 = proxy({
   message: "",
   open: false,
   triggerRect: {
@@ -2851,28 +2990,161 @@ const state$1 = proxy({
   variant: "shade"
 });
 const TooltipController = {
-  state: state$1,
+  state: state$2,
   subscribe(callback) {
-    return subscribe(state$1, () => callback(state$1));
+    return subscribe(state$2, () => callback(state$2));
   },
   subscribeKey(key, callback) {
-    return subscribeKey(state$1, key, callback);
+    return subscribeKey(state$2, key, callback);
   },
   showTooltip({ message, triggerRect, variant }) {
-    state$1.open = true;
-    state$1.message = message;
-    state$1.triggerRect = triggerRect;
-    state$1.variant = variant;
+    state$2.open = true;
+    state$2.message = message;
+    state$2.triggerRect = triggerRect;
+    state$2.variant = variant;
   },
   hide() {
-    state$1.open = false;
-    state$1.message = "";
-    state$1.triggerRect = {
+    state$2.open = false;
+    state$2.message = "";
+    state$2.triggerRect = {
       width: 0,
       height: 0,
       top: 0,
       left: 0
     };
+  }
+};
+
+const SLIP44_MSB = 2147483648;
+const EnsUtil = {
+  convertEVMChainIdToCoinType(chainId) {
+    if (chainId >= SLIP44_MSB) {
+      throw new Error("Invalid chainId");
+    }
+    return (SLIP44_MSB | chainId) >>> 0;
+  }
+};
+
+const state$1 = proxy({
+  suggestions: [],
+  loading: false
+});
+const EnsController = {
+  state: state$1,
+  subscribe(callback) {
+    return subscribe(state$1, () => callback(state$1));
+  },
+  subscribeKey(key, callback) {
+    return subscribeKey$1(state$1, key, callback);
+  },
+  async resolveName(name) {
+    try {
+      return await BlockchainApiController.lookupEnsName(name);
+    } catch (e) {
+      const error = e;
+      throw new Error(error?.reasons?.[0]?.description || "Error resolving name");
+    }
+  },
+  async isNameRegistered(name) {
+    try {
+      await BlockchainApiController.lookupEnsName(name);
+      return true;
+    } catch {
+      return false;
+    }
+  },
+  async getSuggestions(name) {
+    try {
+      state$1.loading = true;
+      state$1.suggestions = [];
+      const response = await BlockchainApiController.getEnsNameSuggestions(name);
+      state$1.suggestions = response.suggestions.map((suggestion) => ({
+        ...suggestion,
+        name: suggestion.name.replace(ConstantsUtil$2.WC_NAME_SUFFIX, "")
+      })) || [];
+      return state$1.suggestions;
+    } catch (e) {
+      const errorMessage = this.parseEnsApiError(e, "Error fetching name suggestions");
+      throw new Error(errorMessage);
+    } finally {
+      state$1.loading = false;
+    }
+  },
+  async getNamesForAddress(address) {
+    try {
+      const network = NetworkController.state.caipNetwork;
+      if (!network) {
+        return [];
+      }
+      const response = await BlockchainApiController.reverseLookupEnsName({ address });
+      return response;
+    } catch (e) {
+      const errorMessage = this.parseEnsApiError(e, "Error fetching names for address");
+      throw new Error(errorMessage);
+    }
+  },
+  async registerName(name) {
+    const network = NetworkController.state.caipNetwork;
+    if (!network) {
+      throw new Error("Network not found");
+    }
+    const address = AccountController.state.address;
+    const emailConnector = ConnectorController.getAuthConnector();
+    if (!address || !emailConnector) {
+      throw new Error("Address or auth connector not found");
+    }
+    if (!this.isAllowedToRegisterName()) {
+      throw new Error("Not allowed to register name");
+    }
+    state$1.loading = true;
+    try {
+      const message = JSON.stringify({
+        name: `${name}${ConstantsUtil$2.WC_NAME_SUFFIX}`,
+        attributes: {},
+        timestamp: Math.floor(Date.now() / 1e3)
+      });
+      RouterController.pushTransactionStack({
+        view: "RegisterAccountNameSuccess",
+        goBack: false,
+        replace: true,
+        onCancel() {
+          state$1.loading = false;
+        }
+      });
+      const signature = await ConnectionController.signMessage(message);
+      const networkId = NetworkUtil.caipNetworkIdToNumber(network.id);
+      if (!networkId) {
+        throw new Error("Network not found");
+      }
+      const coinType = EnsUtil.convertEVMChainIdToCoinType(networkId);
+      await BlockchainApiController.registerEnsName({
+        coinType,
+        address,
+        signature,
+        message
+      });
+      AccountController.setProfileName(`${name}${ConstantsUtil$2.WC_NAME_SUFFIX}`);
+      RouterController.replace("RegisterAccountNameSuccess");
+    } catch (e) {
+      const errorMessage = this.parseEnsApiError(e, `Error registering name ${name}`);
+      RouterController.replace("RegisterAccountName");
+      throw new Error(errorMessage);
+    } finally {
+      state$1.loading = false;
+    }
+  },
+  validateName(name) {
+    return /^[a-zA-Z0-9-]{4,}$/u.test(name);
+  },
+  parseEnsApiError(error, defaultError) {
+    const ensError = error;
+    return ensError?.reasons?.[0]?.description || defaultError;
+  },
+  isAllowedToRegisterName() {
+    const emailConnector = ConnectorController.getAuthConnector();
+    const email = emailConnector?.provider.getEmail() || "";
+    const domain = email.split("@")?.[1];
+    return domain && ConstantsUtil$2.WC_NAMES_ALLOWED_DOMAINS.includes(domain);
   }
 };
 
@@ -2925,10 +3197,13 @@ const RouterUtil = {
   },
   navigateAfterPreferredAccountTypeSelect() {
     const { isSiweEnabled } = OptionsController.state;
+    const { profileName } = AccountController.state;
     if (isSiweEnabled) {
       RouterController.push("ConnectingSiwe");
-    } else {
+    } else if (profileName) {
       RouterController.push("Account");
+    } else {
+      RouterController.push("ChooseAccountName");
     }
   }
 };
@@ -3057,6 +3332,7 @@ function createRootStyles(themeVariables) {
         --wui-spacing-2xl: 32px;
         --wui-spacing-3xl: 40px;
         --wui-spacing-4xl: 90px;
+        --wui-spacing-5xl: 95px;
 
         --wui-icon-box-size-xxs: 14px;
         --wui-icon-box-size-xs: 20px;
@@ -3073,6 +3349,7 @@ function createRootStyles(themeVariables) {
         --wui-icon-size-mdl: 18px;
         --wui-icon-size-lg: 20px;
         --wui-icon-size-xl: 24px;
+        --wui-icon-size-xxl: 28px;
 
         --wui-wallet-image-size-inherit: inherit;
         --wui-wallet-image-size-sm: 40px;
@@ -3678,7 +3955,7 @@ function customElement(tagName) {
   };
 }
 
-const styles$1$ = i$5`
+const styles$23 = i$5`
   :host {
     display: block;
     border-radius: clamp(0px, var(--wui-border-radius-l), 44px);
@@ -3688,7 +3965,7 @@ const styles$1$ = i$5`
   }
 `;
 
-var __decorate$2w = function(decorators, target, key, desc) {
+var __decorate$2A = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -3703,8 +3980,8 @@ let WuiCard = class WuiCard2 extends s$2 {
     return x$2`<slot></slot>`;
   }
 };
-WuiCard.styles = [resetStyles, styles$1$];
-WuiCard = __decorate$2w([
+WuiCard.styles = [resetStyles, styles$23];
+WuiCard = __decorate$2A([
   customElement("wui-card")
 ], WuiCard);
 
@@ -3720,7 +3997,7 @@ WuiCard = __decorate$2w([
  * SPDX-License-Identifier: BSD-3-Clause
  */function r$3(r){return n$6({...r,state:!0,attribute:!1})}
 
-const styles$1_ = i$5`
+const styles$22 = i$5`
   :host {
     display: flex;
     aspect-ratio: 1 / 1;
@@ -3899,19 +4176,16 @@ const checkmarkBoldSvg = b$4`<svg fill="none" viewBox="0 0 14 14">
 </svg>`;
 
 const checkmarkSvg = b$4`<svg
-  xmlns="http://www.w3.org/2000/svg"
-  width="12"
-  height="12"
-  viewBox="0 0 12 12"
-  fill="none"
->
+  width="28"
+  height="28"
+  viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path
     fill-rule="evenodd"
     clip-rule="evenodd"
-    d="M10.537 2.34245C10.8997 2.64654 10.9471 3.187 10.6429 3.54959L5.61072 9.54757C5.45645 9.73144 5.23212 9.84222 4.99229 9.85295C4.75247 9.86368 4.51914 9.77337 4.34906 9.60401L1.40881 6.6761C1.07343 6.34213 1.07238 5.7996 1.40647 5.46433C1.74055 5.12906 2.28326 5.12801 2.61865 5.46198L4.89731 7.73108L9.32942 2.44834C9.63362 2.08576 10.1743 2.03835 10.537 2.34245Z"
-    fill="currentColor"
-  /></svg
->`;
+    d="M25.5297 4.92733C26.1221 5.4242 26.1996 6.30724 25.7027 6.89966L12.2836 22.8997C12.0316 23.2001 11.6652 23.3811 11.2735 23.3986C10.8817 23.4161 10.5006 23.2686 10.2228 22.9919L2.38218 15.1815C1.83439 14.6358 1.83268 13.7494 2.37835 13.2016C2.92403 12.6538 3.81046 12.6521 4.35825 13.1978L11.1183 19.9317L23.5573 5.10036C24.0542 4.50794 24.9372 4.43047 25.5297 4.92733Z"
+    fill="#26D962"/>
+</svg>
+`;
 
 const chevronBottomSvg = b$4`<svg fill="none" viewBox="0 0 16 16">
   <path
@@ -4568,6 +4842,19 @@ const warningCircleSvg = b$4`<svg fill="none" viewBox="0 0 20 20">
   />
 </svg>`;
 
+const idSvg = b$4`<svg
+ xmlns="http://www.w3.org/2000/svg"
+ width="28"
+ height="28"
+ viewBox="0 0 28 28"
+ fill="none">
+  <path
+    fill="#949E9E"
+    fill-rule="evenodd"
+    d="M7.974 2.975h12.052c1.248 0 2.296 0 3.143.092.89.096 1.723.307 2.461.844a4.9 4.9 0 0 1 1.084 1.084c.537.738.748 1.57.844 2.461.092.847.092 1.895.092 3.143v6.802c0 1.248 0 2.296-.092 3.143-.096.89-.307 1.723-.844 2.461a4.9 4.9 0 0 1-1.084 1.084c-.738.537-1.57.748-2.461.844-.847.092-1.895.092-3.143.092H7.974c-1.247 0-2.296 0-3.143-.092-.89-.096-1.723-.307-2.461-.844a4.901 4.901 0 0 1-1.084-1.084c-.537-.738-.748-1.571-.844-2.461C.35 19.697.35 18.649.35 17.4v-6.802c0-1.248 0-2.296.092-3.143.096-.89.307-1.723.844-2.461A4.9 4.9 0 0 1 2.37 3.91c.738-.537 1.571-.748 2.461-.844.847-.092 1.895-.092 3.143-.092ZM5.133 5.85c-.652.071-.936.194-1.117.326a2.1 2.1 0 0 0-.465.465c-.132.181-.255.465-.325 1.117-.074.678-.076 1.573-.076 2.917v6.65c0 1.344.002 2.239.076 2.917.07.652.193.936.325 1.117a2.1 2.1 0 0 0 .465.465c.181.132.465.255 1.117.326.678.073 1.574.075 2.917.075h11.9c1.344 0 2.239-.002 2.917-.075.652-.071.936-.194 1.117-.326.179-.13.335-.286.465-.465.132-.181.255-.465.326-1.117.073-.678.075-1.573.075-2.917v-6.65c0-1.344-.002-2.239-.075-2.917-.071-.652-.194-.936-.326-1.117a2.1 2.1 0 0 0-.465-.465c-.181-.132-.465-.255-1.117-.326-.678-.073-1.573-.075-2.917-.075H8.05c-1.343 0-2.239.002-2.917.075Zm.467 7.275a3.15 3.15 0 1 1 6.3 0 3.15 3.15 0 0 1-6.3 0Zm8.75-1.75a1.4 1.4 0 0 1 1.4-1.4h3.5a1.4 1.4 0 0 1 0 2.8h-3.5a1.4 1.4 0 0 1-1.4-1.4Zm0 5.25a1.4 1.4 0 0 1 1.4-1.4H21a1.4 1.4 0 1 1 0 2.8h-5.25a1.4 1.4 0 0 1-1.4-1.4Z"
+    clip-rule="evenodd"/>
+</svg>`;
+
 const xSvg = b$4`<svg fill="none" viewBox="0 0 41 40">
   <g clip-path="url(#a)">
     <path fill="#000" d="M.8 0h40v40H.8z" />
@@ -4581,7 +4868,7 @@ const xSvg = b$4`<svg fill="none" viewBox="0 0 41 40">
   </defs>
 </svg>`;
 
-var __decorate$2v = function(decorators, target, key, desc) {
+var __decorate$2z = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -4629,6 +4916,7 @@ const svgOptions$1 = {
   github: githubSvg,
   google: googleSvg$1,
   helpCircle: helpCircleSvg,
+  id: idSvg,
   infoCircle: infoCircleSvg,
   mail: mailSvg,
   mobile: mobileSvg,
@@ -4675,21 +4963,21 @@ let WuiIcon = class WuiIcon2 extends s$2 {
     return x$2`${svgOptions$1[this.name]}`;
   }
 };
-WuiIcon.styles = [resetStyles, colorStyles, styles$1_];
-__decorate$2v([
+WuiIcon.styles = [resetStyles, colorStyles, styles$22];
+__decorate$2z([
   n$6()
 ], WuiIcon.prototype, "size", void 0);
-__decorate$2v([
+__decorate$2z([
   n$6()
 ], WuiIcon.prototype, "name", void 0);
-__decorate$2v([
+__decorate$2z([
   n$6()
 ], WuiIcon.prototype, "color", void 0);
-WuiIcon = __decorate$2v([
+WuiIcon = __decorate$2z([
   customElement("wui-icon")
 ], WuiIcon);
 
-const styles$1Z = i$5`
+const styles$21 = i$5`
   :host {
     display: block;
     width: var(--local-width);
@@ -4706,7 +4994,7 @@ const styles$1Z = i$5`
   }
 `;
 
-var __decorate$2u = function(decorators, target, key, desc) {
+var __decorate$2y = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -4731,21 +5019,21 @@ let WuiImage = class WuiImage2 extends s$2 {
     return x$2`<img src=${this.src} alt=${this.alt} />`;
   }
 };
-WuiImage.styles = [resetStyles, colorStyles, styles$1Z];
-__decorate$2u([
+WuiImage.styles = [resetStyles, colorStyles, styles$21];
+__decorate$2y([
   n$6()
 ], WuiImage.prototype, "src", void 0);
-__decorate$2u([
+__decorate$2y([
   n$6()
 ], WuiImage.prototype, "alt", void 0);
-__decorate$2u([
+__decorate$2y([
   n$6()
 ], WuiImage.prototype, "size", void 0);
-WuiImage = __decorate$2u([
+WuiImage = __decorate$2y([
   customElement("wui-image")
 ], WuiImage);
 
-const styles$1Y = i$5`
+const styles$20 = i$5`
   :host {
     display: block;
     width: var(--wui-box-size-lg);
@@ -4775,7 +5063,7 @@ const styles$1Y = i$5`
   }
 `;
 
-var __decorate$2t = function(decorators, target, key, desc) {
+var __decorate$2x = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -4798,12 +5086,12 @@ let WuiLoadingHexagon = class WuiLoadingHexagon2 extends s$2 {
     `;
   }
 };
-WuiLoadingHexagon.styles = [resetStyles, styles$1Y];
-WuiLoadingHexagon = __decorate$2t([
+WuiLoadingHexagon.styles = [resetStyles, styles$20];
+WuiLoadingHexagon = __decorate$2x([
   customElement("wui-loading-hexagon")
 ], WuiLoadingHexagon);
 
-const styles$1X = i$5`
+const styles$1$ = i$5`
   :host {
     display: flex;
   }
@@ -4873,7 +5161,7 @@ const styles$1X = i$5`
   }
 `;
 
-var __decorate$2s = function(decorators, target, key, desc) {
+var __decorate$2w = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -4897,18 +5185,18 @@ let WuiLoadingSpinner = class WuiLoadingSpinner2 extends s$2 {
     </svg>`;
   }
 };
-WuiLoadingSpinner.styles = [resetStyles, styles$1X];
-__decorate$2s([
+WuiLoadingSpinner.styles = [resetStyles, styles$1$];
+__decorate$2w([
   n$6()
 ], WuiLoadingSpinner.prototype, "color", void 0);
-__decorate$2s([
+__decorate$2w([
   n$6()
 ], WuiLoadingSpinner.prototype, "size", void 0);
-WuiLoadingSpinner = __decorate$2s([
+WuiLoadingSpinner = __decorate$2w([
   customElement("wui-loading-spinner")
 ], WuiLoadingSpinner);
 
-const styles$1W = i$5`
+const styles$1_ = i$5`
   :host {
     display: block;
     width: var(--wui-box-size-md);
@@ -4935,7 +5223,7 @@ const styles$1W = i$5`
   }
 `;
 
-var __decorate$2r = function(decorators, target, key, desc) {
+var __decorate$2v = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -4975,15 +5263,15 @@ let WuiLoadingThumbnail = class WuiLoadingThumbnail2 extends s$2 {
     `;
   }
 };
-WuiLoadingThumbnail.styles = [resetStyles, styles$1W];
-__decorate$2r([
+WuiLoadingThumbnail.styles = [resetStyles, styles$1_];
+__decorate$2v([
   n$6({ type: Number })
 ], WuiLoadingThumbnail.prototype, "radius", void 0);
-WuiLoadingThumbnail = __decorate$2r([
+WuiLoadingThumbnail = __decorate$2v([
   customElement("wui-loading-thumbnail")
 ], WuiLoadingThumbnail);
 
-const styles$1V = i$5`
+const styles$1Z = i$5`
   :host {
     display: block;
     box-shadow: inset 0 0 0 1px var(--wui-color-gray-glass-005);
@@ -5025,7 +5313,7 @@ const styles$1V = i$5`
   }
 `;
 
-var __decorate$2q = function(decorators, target, key, desc) {
+var __decorate$2u = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -5052,20 +5340,20 @@ let WuiShimmer = class WuiShimmer2 extends s$2 {
     return x$2`<slot></slot>`;
   }
 };
-WuiShimmer.styles = [styles$1V];
-__decorate$2q([
+WuiShimmer.styles = [styles$1Z];
+__decorate$2u([
   n$6()
 ], WuiShimmer.prototype, "width", void 0);
-__decorate$2q([
+__decorate$2u([
   n$6()
 ], WuiShimmer.prototype, "height", void 0);
-__decorate$2q([
+__decorate$2u([
   n$6()
 ], WuiShimmer.prototype, "borderRadius", void 0);
-__decorate$2q([
+__decorate$2u([
   n$6()
 ], WuiShimmer.prototype, "variant", void 0);
-WuiShimmer = __decorate$2q([
+WuiShimmer = __decorate$2u([
   customElement("wui-shimmer")
 ], WuiShimmer);
 
@@ -5082,7 +5370,7 @@ const t={ATTRIBUTE:1,CHILD:2,PROPERTY:3,BOOLEAN_ATTRIBUTE:4,EVENT:5,ELEMENT:6},e
  * SPDX-License-Identifier: BSD-3-Clause
  */const e$2=e$3(class extends i$2{constructor(t$1){if(super(t$1),t$1.type!==t.ATTRIBUTE||"class"!==t$1.name||t$1.strings?.length>2)throw Error("`classMap()` can only be used in the `class` attribute and must be the only part in the attribute.")}render(t){return " "+Object.keys(t).filter((s=>t[s])).join(" ")+" "}update(s,[i]){if(void 0===this.st){this.st=new Set,void 0!==s.strings&&(this.nt=new Set(s.strings.join(" ").split(/\s/).filter((t=>""!==t))));for(const t in i)i[t]&&!this.nt?.has(t)&&this.st.add(t);return this.render(i)}const r=s.element.classList;for(const t of this.st)t in i||(r.remove(t),this.st.delete(t));for(const t in i){const s=!!i[t];s===this.st.has(t)||this.nt?.has(t)||(s?(r.add(t),this.st.add(t)):(r.remove(t),this.st.delete(t)));}return w$4}});
 
-const styles$1U = i$5`
+const styles$1Y = i$5`
   :host {
     display: inline-flex !important;
   }
@@ -5193,7 +5481,7 @@ const styles$1U = i$5`
   }
 `;
 
-var __decorate$2p = function(decorators, target, key, desc) {
+var __decorate$2t = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -5222,17 +5510,17 @@ let WuiText = class WuiText2 extends s$2 {
     return x$2`<slot class=${e$2(classes)}></slot>`;
   }
 };
-WuiText.styles = [resetStyles, styles$1U];
-__decorate$2p([
+WuiText.styles = [resetStyles, styles$1Y];
+__decorate$2t([
   n$6()
 ], WuiText.prototype, "variant", void 0);
-__decorate$2p([
+__decorate$2t([
   n$6()
 ], WuiText.prototype, "color", void 0);
-__decorate$2p([
+__decorate$2t([
   n$6()
 ], WuiText.prototype, "align", void 0);
-WuiText = __decorate$2p([
+WuiText = __decorate$2t([
   customElement("wui-text")
 ], WuiText);
 
@@ -5750,7 +6038,7 @@ const lightbulbSvg = b$4`<svg width="64" height="64" viewBox="0 0 64 64" fill="n
 </svg>
 `;
 
-const styles$1T = i$5`
+const styles$1X = i$5`
   :host {
     display: block;
     width: var(--local-size);
@@ -5763,7 +6051,7 @@ const styles$1T = i$5`
   }
 `;
 
-var __decorate$2o = function(decorators, target, key, desc) {
+var __decorate$2s = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -5809,14 +6097,14 @@ let WuiVisual = class WuiVisual2 extends s$2 {
     return x$2`${svgOptions[this.name]}`;
   }
 };
-WuiVisual.styles = [resetStyles, styles$1T];
-__decorate$2o([
+WuiVisual.styles = [resetStyles, styles$1X];
+__decorate$2s([
   n$6()
 ], WuiVisual.prototype, "name", void 0);
-__decorate$2o([
+__decorate$2s([
   n$6()
 ], WuiVisual.prototype, "size", void 0);
-WuiVisual = __decorate$2o([
+WuiVisual = __decorate$2s([
   customElement("wui-visual")
 ], WuiVisual);
 
@@ -5938,7 +6226,7 @@ const UiHelperUtil = {
   }
 };
 
-const styles$1S = i$5`
+const styles$1W = i$5`
   :host {
     display: flex;
     width: inherit;
@@ -5946,7 +6234,7 @@ const styles$1S = i$5`
   }
 `;
 
-var __decorate$2n = function(decorators, target, key, desc) {
+var __decorate$2r = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -5981,48 +6269,48 @@ let WuiFlex = class WuiFlex2 extends s$2 {
     return x$2`<slot></slot>`;
   }
 };
-WuiFlex.styles = [resetStyles, styles$1S];
-__decorate$2n([
+WuiFlex.styles = [resetStyles, styles$1W];
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "flexDirection", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "flexWrap", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "flexBasis", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "flexGrow", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "flexShrink", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "alignItems", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "justifyContent", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "columnGap", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "rowGap", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "gap", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "padding", void 0);
-__decorate$2n([
+__decorate$2r([
   n$6()
 ], WuiFlex.prototype, "margin", void 0);
-WuiFlex = __decorate$2n([
+WuiFlex = __decorate$2r([
   customElement("wui-flex")
 ], WuiFlex);
 
-const styles$1R = i$5`
+const styles$1V = i$5`
   :host {
     display: block;
     width: var(--wui-icon-box-size-xl);
@@ -6098,7 +6386,7 @@ const styles$1R = i$5`
   }
 `;
 
-var __decorate$2m = function(decorators, target, key, desc) {
+var __decorate$2q = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6132,21 +6420,21 @@ let WuiAvatar = class WuiAvatar2 extends s$2 {
     return null;
   }
 };
-WuiAvatar.styles = [resetStyles, styles$1R];
-__decorate$2m([
+WuiAvatar.styles = [resetStyles, styles$1V];
+__decorate$2q([
   n$6()
 ], WuiAvatar.prototype, "imageSrc", void 0);
-__decorate$2m([
+__decorate$2q([
   n$6()
 ], WuiAvatar.prototype, "alt", void 0);
-__decorate$2m([
+__decorate$2q([
   n$6()
 ], WuiAvatar.prototype, "address", void 0);
-WuiAvatar = __decorate$2m([
+WuiAvatar = __decorate$2q([
   customElement("wui-avatar")
 ], WuiAvatar);
 
-const styles$1Q = i$5`
+const styles$1U = i$5`
   :host {
     display: inline-flex;
     justify-content: center;
@@ -6170,7 +6458,7 @@ const styles$1Q = i$5`
   }
 `;
 
-var __decorate$2l = function(decorators, target, key, desc) {
+var __decorate$2p = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6216,36 +6504,36 @@ let WuiIconBox = class WuiIconBox2 extends s$2 {
     return x$2` <wui-icon color=${this.iconColor} size=${iconSize} name=${this.icon}></wui-icon> `;
   }
 };
-WuiIconBox.styles = [resetStyles, elementStyles, styles$1Q];
-__decorate$2l([
+WuiIconBox.styles = [resetStyles, elementStyles, styles$1U];
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "size", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "backgroundColor", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "iconColor", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "iconSize", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "background", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6({ type: Boolean })
 ], WuiIconBox.prototype, "border", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "borderColor", void 0);
-__decorate$2l([
+__decorate$2p([
   n$6()
 ], WuiIconBox.prototype, "icon", void 0);
-WuiIconBox = __decorate$2l([
+WuiIconBox = __decorate$2p([
   customElement("wui-icon-box")
 ], WuiIconBox);
 
-const styles$1P = i$5`
+const styles$1T = i$5`
   :host {
     display: block;
   }
@@ -6350,7 +6638,7 @@ const styles$1P = i$5`
   }
 `;
 
-var __decorate$2k = function(decorators, target, key, desc) {
+var __decorate$2o = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6425,39 +6713,39 @@ let WuiAccountButton = class WuiAccountButton2 extends s$2 {
     return null;
   }
 };
-WuiAccountButton.styles = [resetStyles, elementStyles, styles$1P];
-__decorate$2k([
+WuiAccountButton.styles = [resetStyles, elementStyles, styles$1T];
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "networkSrc", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "avatarSrc", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "balance", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6({ type: Boolean })
 ], WuiAccountButton.prototype, "isUnsupportedChain", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6({ type: Boolean })
 ], WuiAccountButton.prototype, "disabled", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "address", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "profileName", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "charsStart", void 0);
-__decorate$2k([
+__decorate$2o([
   n$6()
 ], WuiAccountButton.prototype, "charsEnd", void 0);
-WuiAccountButton = __decorate$2k([
+WuiAccountButton = __decorate$2o([
   customElement("wui-account-button")
 ], WuiAccountButton);
 
-const styles$1O = i$5`
+const styles$1S = i$5`
   :host {
     position: relative;
     background-color: var(--wui-color-gray-glass-002);
@@ -6537,7 +6825,7 @@ const styles$1O = i$5`
   }
 `;
 
-var __decorate$2j = function(decorators, target, key, desc) {
+var __decorate$2n = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6594,30 +6882,30 @@ let WuiWalletImage = class WuiWalletImage2 extends s$2 {
     ></wui-icon>`;
   }
 };
-WuiWalletImage.styles = [resetStyles, styles$1O];
-__decorate$2j([
+WuiWalletImage.styles = [resetStyles, styles$1S];
+__decorate$2n([
   n$6()
 ], WuiWalletImage.prototype, "size", void 0);
-__decorate$2j([
+__decorate$2n([
   n$6()
 ], WuiWalletImage.prototype, "name", void 0);
-__decorate$2j([
+__decorate$2n([
   n$6()
 ], WuiWalletImage.prototype, "imageSrc", void 0);
-__decorate$2j([
+__decorate$2n([
   n$6()
 ], WuiWalletImage.prototype, "walletIcon", void 0);
-__decorate$2j([
+__decorate$2n([
   n$6({ type: Boolean })
 ], WuiWalletImage.prototype, "installed", void 0);
-__decorate$2j([
+__decorate$2n([
   n$6()
 ], WuiWalletImage.prototype, "badgeSize", void 0);
-WuiWalletImage = __decorate$2j([
+WuiWalletImage = __decorate$2n([
   customElement("wui-wallet-image")
 ], WuiWalletImage);
 
-const styles$1N = i$5`
+const styles$1R = i$5`
   :host {
     position: relative;
     border-radius: var(--wui-border-radius-xxs);
@@ -6664,7 +6952,7 @@ const styles$1N = i$5`
   }
 `;
 
-var __decorate$2i = function(decorators, target, key, desc) {
+var __decorate$2m = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6702,15 +6990,15 @@ let WuiAllWalletsImage = class WuiAllWalletsImage2 extends s$2 {
       </wui-flex>`;
   }
 };
-WuiAllWalletsImage.styles = [resetStyles, styles$1N];
-__decorate$2i([
+WuiAllWalletsImage.styles = [resetStyles, styles$1R];
+__decorate$2m([
   n$6({ type: Array })
 ], WuiAllWalletsImage.prototype, "walletImages", void 0);
-WuiAllWalletsImage = __decorate$2i([
+WuiAllWalletsImage = __decorate$2m([
   customElement("wui-all-wallets-image")
 ], WuiAllWalletsImage);
 
-const styles$1M = i$5`
+const styles$1Q = i$5`
   :host {
     width: var(--local-width);
     position: relative;
@@ -6891,7 +7179,7 @@ const styles$1M = i$5`
   }
 `;
 
-var __decorate$2h = function(decorators, target, key, desc) {
+var __decorate$2l = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -6971,35 +7259,35 @@ let WuiButton = class WuiButton2 extends s$2 {
     return x$2``;
   }
 };
-WuiButton.styles = [resetStyles, elementStyles, styles$1M];
-__decorate$2h([
+WuiButton.styles = [resetStyles, elementStyles, styles$1Q];
+__decorate$2l([
   n$6()
 ], WuiButton.prototype, "size", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6({ type: Boolean })
 ], WuiButton.prototype, "disabled", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6({ type: Boolean })
 ], WuiButton.prototype, "fullWidth", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6({ type: Boolean })
 ], WuiButton.prototype, "loading", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6()
 ], WuiButton.prototype, "variant", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6({ type: Boolean })
 ], WuiButton.prototype, "hasIconLeft", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6({ type: Boolean })
 ], WuiButton.prototype, "hasIconRight", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6()
 ], WuiButton.prototype, "borderRadius", void 0);
-__decorate$2h([
+__decorate$2l([
   n$6()
 ], WuiButton.prototype, "textVariant", void 0);
-WuiButton = __decorate$2h([
+WuiButton = __decorate$2l([
   customElement("wui-button")
 ], WuiButton);
 
@@ -7009,7 +7297,7 @@ const networkSvgMd = b$4`<svg  viewBox="0 0 48 54" fill="none">
   />
 </svg>`;
 
-const styles$1L = i$5`
+const styles$1P = i$5`
   :host {
     display: flex;
     flex-direction: column;
@@ -7041,7 +7329,7 @@ const styles$1L = i$5`
   }
 `;
 
-var __decorate$2g = function(decorators, target, key, desc) {
+var __decorate$2k = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7075,11 +7363,11 @@ let WuiCardSelectLoader = class WuiCardSelectLoader2 extends s$2 {
     return x$2`<wui-shimmer width="56px" height="56px" borderRadius="xs"></wui-shimmer>`;
   }
 };
-WuiCardSelectLoader.styles = [resetStyles, elementStyles, styles$1L];
-__decorate$2g([
+WuiCardSelectLoader.styles = [resetStyles, elementStyles, styles$1P];
+__decorate$2k([
   n$6()
 ], WuiCardSelectLoader.prototype, "type", void 0);
-WuiCardSelectLoader = __decorate$2g([
+WuiCardSelectLoader = __decorate$2k([
   customElement("wui-card-select-loader")
 ], WuiCardSelectLoader);
 
@@ -7097,7 +7385,7 @@ const networkSvgLg = b$4`<svg width="86" height="96" fill="none">
   />
 </svg>`;
 
-const styles$1K = i$5`
+const styles$1O = i$5`
   :host {
     position: relative;
     border-radius: inherit;
@@ -7137,7 +7425,7 @@ const styles$1K = i$5`
   }
 `;
 
-var __decorate$2f = function(decorators, target, key, desc) {
+var __decorate$2j = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7172,24 +7460,24 @@ let WuiNetworkImage = class WuiNetworkImage2 extends s$2 {
     return x$2`<wui-icon size="inherit" color="fg-200" name="networkPlaceholder"></wui-icon>`;
   }
 };
-WuiNetworkImage.styles = [resetStyles, styles$1K];
-__decorate$2f([
+WuiNetworkImage.styles = [resetStyles, styles$1O];
+__decorate$2j([
   n$6()
 ], WuiNetworkImage.prototype, "size", void 0);
-__decorate$2f([
+__decorate$2j([
   n$6()
 ], WuiNetworkImage.prototype, "name", void 0);
-__decorate$2f([
+__decorate$2j([
   n$6()
 ], WuiNetworkImage.prototype, "imageSrc", void 0);
-__decorate$2f([
+__decorate$2j([
   n$6({ type: Boolean })
 ], WuiNetworkImage.prototype, "selected", void 0);
-WuiNetworkImage = __decorate$2f([
+WuiNetworkImage = __decorate$2j([
   customElement("wui-network-image")
 ], WuiNetworkImage);
 
-const styles$1J = i$5`
+const styles$1N = i$5`
   button {
     flex-direction: column;
     width: 76px;
@@ -7231,7 +7519,7 @@ const styles$1J = i$5`
   }
 `;
 
-var __decorate$2e = function(decorators, target, key, desc) {
+var __decorate$2i = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7284,30 +7572,30 @@ let WuiCardSelect = class WuiCardSelect2 extends s$2 {
     `;
   }
 };
-WuiCardSelect.styles = [resetStyles, elementStyles, styles$1J];
-__decorate$2e([
+WuiCardSelect.styles = [resetStyles, elementStyles, styles$1N];
+__decorate$2i([
   n$6()
 ], WuiCardSelect.prototype, "name", void 0);
-__decorate$2e([
+__decorate$2i([
   n$6()
 ], WuiCardSelect.prototype, "type", void 0);
-__decorate$2e([
+__decorate$2i([
   n$6()
 ], WuiCardSelect.prototype, "imageSrc", void 0);
-__decorate$2e([
+__decorate$2i([
   n$6({ type: Boolean })
 ], WuiCardSelect.prototype, "disabled", void 0);
-__decorate$2e([
+__decorate$2i([
   n$6({ type: Boolean })
 ], WuiCardSelect.prototype, "selected", void 0);
-__decorate$2e([
+__decorate$2i([
   n$6({ type: Boolean })
 ], WuiCardSelect.prototype, "installed", void 0);
-WuiCardSelect = __decorate$2e([
+WuiCardSelect = __decorate$2i([
   customElement("wui-card-select")
 ], WuiCardSelect);
 
-const styles$1I = i$5`
+const styles$1M = i$5`
   a {
     border: 1px solid var(--wui-color-gray-glass-010);
     border-radius: var(--wui-border-radius-3xl);
@@ -7490,7 +7778,7 @@ const styles$1I = i$5`
   }
 `;
 
-var __decorate$2d = function(decorators, target, key, desc) {
+var __decorate$2h = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7536,30 +7824,30 @@ let WuiChip = class WuiChip2 extends s$2 {
     return null;
   }
 };
-WuiChip.styles = [resetStyles, elementStyles, styles$1I];
-__decorate$2d([
+WuiChip.styles = [resetStyles, elementStyles, styles$1M];
+__decorate$2h([
   n$6()
 ], WuiChip.prototype, "variant", void 0);
-__decorate$2d([
+__decorate$2h([
   n$6()
 ], WuiChip.prototype, "imageSrc", void 0);
-__decorate$2d([
+__decorate$2h([
   n$6({ type: Boolean })
 ], WuiChip.prototype, "disabled", void 0);
-__decorate$2d([
+__decorate$2h([
   n$6()
 ], WuiChip.prototype, "icon", void 0);
-__decorate$2d([
+__decorate$2h([
   n$6()
 ], WuiChip.prototype, "href", void 0);
-__decorate$2d([
+__decorate$2h([
   n$6()
 ], WuiChip.prototype, "text", void 0);
-WuiChip = __decorate$2d([
+WuiChip = __decorate$2h([
   customElement("wui-chip")
 ], WuiChip);
 
-const styles$1H = i$5`
+const styles$1L = i$5`
   :host {
     position: relative;
     display: block;
@@ -7657,7 +7945,7 @@ const styles$1H = i$5`
   }
 `;
 
-var __decorate$2c = function(decorators, target, key, desc) {
+var __decorate$2g = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7691,18 +7979,18 @@ let WuiConnectButton = class WuiConnectButton2 extends s$2 {
     return x$2`<wui-loading-spinner size=${this.size} color="accent-100"></wui-loading-spinner>`;
   }
 };
-WuiConnectButton.styles = [resetStyles, elementStyles, styles$1H];
-__decorate$2c([
+WuiConnectButton.styles = [resetStyles, elementStyles, styles$1L];
+__decorate$2g([
   n$6()
 ], WuiConnectButton.prototype, "size", void 0);
-__decorate$2c([
+__decorate$2g([
   n$6({ type: Boolean })
 ], WuiConnectButton.prototype, "loading", void 0);
-WuiConnectButton = __decorate$2c([
+WuiConnectButton = __decorate$2g([
   customElement("wui-connect-button")
 ], WuiConnectButton);
 
-const styles$1G = i$5`
+const styles$1K = i$5`
   wui-flex {
     width: 100%;
     background-color: var(--wui-color-gray-glass-002);
@@ -7710,7 +7998,7 @@ const styles$1G = i$5`
   }
 `;
 
-var __decorate$2b = function(decorators, target, key, desc) {
+var __decorate$2f = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7741,21 +8029,21 @@ let WuiCtaButton = class WuiCtaButton2 extends s$2 {
     `;
   }
 };
-WuiCtaButton.styles = [resetStyles, elementStyles, styles$1G];
-__decorate$2b([
+WuiCtaButton.styles = [resetStyles, elementStyles, styles$1K];
+__decorate$2f([
   n$6({ type: Boolean })
 ], WuiCtaButton.prototype, "disabled", void 0);
-__decorate$2b([
+__decorate$2f([
   n$6()
 ], WuiCtaButton.prototype, "label", void 0);
-__decorate$2b([
+__decorate$2f([
   n$6()
 ], WuiCtaButton.prototype, "buttonLabel", void 0);
-WuiCtaButton = __decorate$2b([
+WuiCtaButton = __decorate$2f([
   customElement("wui-cta-button")
 ], WuiCtaButton);
 
-const styles$1F = i$5`
+const styles$1J = i$5`
   :host {
     display: block;
     padding: var(--wui-spacing-l) var(--wui-spacing-m);
@@ -7765,7 +8053,7 @@ const styles$1F = i$5`
   }
 `;
 
-var __decorate$2a = function(decorators, target, key, desc) {
+var __decorate$2e = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7784,12 +8072,12 @@ let WuiDetailsGroup = class WuiDetailsGroup2 extends s$2 {
     `;
   }
 };
-WuiDetailsGroup.styles = [resetStyles, elementStyles, styles$1F];
-WuiDetailsGroup = __decorate$2a([
+WuiDetailsGroup.styles = [resetStyles, elementStyles, styles$1J];
+WuiDetailsGroup = __decorate$2e([
   customElement("wui-details-group")
 ], WuiDetailsGroup);
 
-const styles$1E = i$5`
+const styles$1I = i$5`
   :host {
     display: flex;
     flex-direction: row;
@@ -7799,7 +8087,7 @@ const styles$1E = i$5`
   }
 `;
 
-var __decorate$29 = function(decorators, target, key, desc) {
+var __decorate$2d = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -7825,11 +8113,11 @@ let WuiDetailsGroupItem = class WuiDetailsGroupItem2 extends s$2 {
     `;
   }
 };
-WuiDetailsGroupItem.styles = [resetStyles, elementStyles, styles$1E];
-__decorate$29([
+WuiDetailsGroupItem.styles = [resetStyles, elementStyles, styles$1I];
+__decorate$2d([
   n$6()
 ], WuiDetailsGroupItem.prototype, "name", void 0);
-WuiDetailsGroupItem = __decorate$29([
+WuiDetailsGroupItem = __decorate$2d([
   customElement("wui-details-group-item")
 ], WuiDetailsGroupItem);
 
@@ -7851,7 +8139,7 @@ WuiDetailsGroupItem = __decorate$29([
  * SPDX-License-Identifier: BSD-3-Clause
  */const e$1=()=>new h$3;let h$3 = class h{};const o$1=new WeakMap,n$4=e$3(class extends f$5{render(i){return T$3}update(i,[s]){const e=s!==this.Y;return e&&void 0!==this.Y&&this.rt(void 0),(e||this.lt!==this.ct)&&(this.Y=s,this.ht=i.options?.host,this.rt(this.ct=i.element)),T$3}rt(t){if("function"==typeof this.Y){const i=this.ht??globalThis;let s=o$1.get(i);void 0===s&&(s=new WeakMap,o$1.set(i,s)),void 0!==s.get(this.Y)&&this.Y.call(this.ht,void 0),s.set(this.Y,t),void 0!==t&&this.Y.call(this.ht,t);}else this.Y.value=t;}get lt(){return "function"==typeof this.Y?o$1.get(this.ht??globalThis)?.get(this.Y):this.Y?.value}disconnected(){this.lt===this.ct&&this.rt(void 0);}reconnected(){this.rt(this.ct);}});
 
-const styles$1D = i$5`
+const styles$1H = i$5`
   :host {
     position: relative;
     width: 100%;
@@ -7948,6 +8236,42 @@ const styles$1D = i$5`
     height: 64px;
   }
 
+  .wui-padding-right-xs {
+    padding-right: var(--wui-spacing-xs);
+  }
+
+  .wui-padding-right-s {
+    padding-right: var(--wui-spacing-s);
+  }
+
+  .wui-padding-right-m {
+    padding-right: var(--wui-spacing-m);
+  }
+
+  .wui-padding-right-l {
+    padding-right: var(--wui-spacing-l);
+  }
+
+  .wui-padding-right-xl {
+    padding-right: var(--wui-spacing-xl);
+  }
+
+  .wui-padding-right-2xl {
+    padding-right: var(--wui-spacing-2xl);
+  }
+
+  .wui-padding-right-3xl {
+    padding-right: var(--wui-spacing-3xl);
+  }
+
+  .wui-padding-right-4xl {
+    padding-right: var(--wui-spacing-4xl);
+  }
+
+  .wui-padding-right-5xl {
+    padding-right: var(--wui-spacing-5xl);
+  }
+
   wui-icon + .wui-size-lg,
   wui-loading-spinner + .wui-size-lg {
     padding-left: 50px;
@@ -8000,7 +8324,7 @@ const styles$1D = i$5`
   }
 `;
 
-var __decorate$28 = function(decorators, target, key, desc) {
+var __decorate$2c = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8021,11 +8345,16 @@ let WuiInputText = class WuiInputText2 extends s$2 {
     this.value = "";
   }
   render() {
+    const inputClass = `wui-padding-right-${this.inputRightPadding}`;
     const sizeClass = `wui-size-${this.size}`;
-    return x$2` ${this.templateIcon()}
+    const classes = {
+      [sizeClass]: true,
+      [inputClass]: Boolean(this.inputRightPadding)
+    };
+    return x$2`${this.templateIcon()}
       <input
         ${n$4(this.inputElementRef)}
-        class=${sizeClass}
+        class=${e$2(classes)}
         type=${this.type}
         enterkeyhint=${o$3(this.enterKeyHint)}
         ?disabled=${this.disabled}
@@ -8054,33 +8383,36 @@ let WuiInputText = class WuiInputText2 extends s$2 {
     }));
   }
 };
-WuiInputText.styles = [resetStyles, elementStyles, styles$1D];
-__decorate$28([
+WuiInputText.styles = [resetStyles, elementStyles, styles$1H];
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "size", void 0);
-__decorate$28([
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "icon", void 0);
-__decorate$28([
+__decorate$2c([
   n$6({ type: Boolean })
 ], WuiInputText.prototype, "disabled", void 0);
-__decorate$28([
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "placeholder", void 0);
-__decorate$28([
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "type", void 0);
-__decorate$28([
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "keyHint", void 0);
-__decorate$28([
+__decorate$2c([
   n$6()
 ], WuiInputText.prototype, "value", void 0);
-WuiInputText = __decorate$28([
+__decorate$2c([
+  n$6()
+], WuiInputText.prototype, "inputRightPadding", void 0);
+WuiInputText = __decorate$2c([
   customElement("wui-input-text")
 ], WuiInputText);
 
-const styles$1C = i$5`
+const styles$1G = i$5`
   :host {
     position: relative;
     display: inline-block;
@@ -8091,7 +8423,7 @@ const styles$1C = i$5`
   }
 `;
 
-var __decorate$27 = function(decorators, target, key, desc) {
+var __decorate$2b = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8126,21 +8458,104 @@ let WuiEmailInput = class WuiEmailInput2 extends s$2 {
     return null;
   }
 };
-WuiEmailInput.styles = [resetStyles, styles$1C];
-__decorate$27([
+WuiEmailInput.styles = [resetStyles, styles$1G];
+__decorate$2b([
   n$6()
 ], WuiEmailInput.prototype, "errorMessage", void 0);
-__decorate$27([
+__decorate$2b([
   n$6({ type: Boolean })
 ], WuiEmailInput.prototype, "disabled", void 0);
-__decorate$27([
+__decorate$2b([
   n$6()
 ], WuiEmailInput.prototype, "value", void 0);
-WuiEmailInput = __decorate$27([
+WuiEmailInput = __decorate$2b([
   customElement("wui-email-input")
 ], WuiEmailInput);
 
-const styles$1B = i$5`
+const styles$1F = i$5`
+  :host {
+    position: relative;
+    width: 100%;
+    display: inline-block;
+    color: var(--wui-color-fg-275);
+  }
+
+  .error {
+    margin: var(--wui-spacing-xxs) var(--wui-spacing-m) var(--wui-spacing-0) var(--wui-spacing-m);
+  }
+
+  .base-name {
+    position: absolute;
+    right: 45px;
+    top: 15px;
+    text-align: right;
+  }
+`;
+
+var __decorate$2a = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let WuiEnsInput = class WuiEnsInput2 extends s$2 {
+  constructor() {
+    super(...arguments);
+    this.disabled = false;
+    this.loading = false;
+  }
+  render() {
+    return x$2`
+      <wui-input-text
+        value=${o$3(this.value)}
+        ?disabled=${this.disabled}
+        .value=${this.value || ""}
+        data-testId="wui-ens-input"
+        inputRightPadding="5xl"
+      >
+        ${this.baseNameTemplate()} ${this.errorTemplate()}${this.loadingTemplate()}
+      </wui-input-text>
+    `;
+  }
+  baseNameTemplate() {
+    return x$2`<wui-text variant="paragraph-400" color="fg-200" class="base-name">
+      ${ConstantsUtil$2.WC_NAME_SUFFIX}
+    </wui-text>`;
+  }
+  loadingTemplate() {
+    return this.loading ? x$2`<wui-loading-spinner size="md" color="accent-100"></wui-loading-spinner>` : null;
+  }
+  errorTemplate() {
+    if (this.errorMessage) {
+      return x$2`<wui-text variant="tiny-500" color="error-100" class="error"
+        >${this.errorMessage}</wui-text
+      >`;
+    }
+    return null;
+  }
+};
+WuiEnsInput.styles = [resetStyles, styles$1F];
+__decorate$2a([
+  n$6()
+], WuiEnsInput.prototype, "errorMessage", void 0);
+__decorate$2a([
+  n$6({ type: Boolean })
+], WuiEnsInput.prototype, "disabled", void 0);
+__decorate$2a([
+  n$6()
+], WuiEnsInput.prototype, "value", void 0);
+__decorate$2a([
+  n$6({ type: Boolean })
+], WuiEnsInput.prototype, "loading", void 0);
+WuiEnsInput = __decorate$2a([
+  customElement("wui-ens-input")
+], WuiEnsInput);
+
+const styles$1E = i$5`
   button {
     border-radius: var(--local-border-radius);
     color: var(--wui-color-fg-100);
@@ -8170,7 +8585,7 @@ const styles$1B = i$5`
   }
 `;
 
-var __decorate$26 = function(decorators, target, key, desc) {
+var __decorate$29 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8202,24 +8617,24 @@ let WuiIconLink = class WuiIconLink2 extends s$2 {
     `;
   }
 };
-WuiIconLink.styles = [resetStyles, elementStyles, colorStyles, styles$1B];
-__decorate$26([
+WuiIconLink.styles = [resetStyles, elementStyles, colorStyles, styles$1E];
+__decorate$29([
   n$6()
 ], WuiIconLink.prototype, "size", void 0);
-__decorate$26([
+__decorate$29([
   n$6({ type: Boolean })
 ], WuiIconLink.prototype, "disabled", void 0);
-__decorate$26([
+__decorate$29([
   n$6()
 ], WuiIconLink.prototype, "icon", void 0);
-__decorate$26([
+__decorate$29([
   n$6()
 ], WuiIconLink.prototype, "iconColor", void 0);
-WuiIconLink = __decorate$26([
+WuiIconLink = __decorate$29([
   customElement("wui-icon-link")
 ], WuiIconLink);
 
-const styles$1A = i$5`
+const styles$1D = i$5`
   button {
     background-color: var(--wui-color-fg-300);
     border-radius: var(--wui-border-radius-4xs);
@@ -8251,7 +8666,7 @@ const styles$1A = i$5`
   }
 `;
 
-var __decorate$25 = function(decorators, target, key, desc) {
+var __decorate$28 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8274,15 +8689,15 @@ let WuiInputElement = class WuiInputElement2 extends s$2 {
     `;
   }
 };
-WuiInputElement.styles = [resetStyles, elementStyles, styles$1A];
-__decorate$25([
+WuiInputElement.styles = [resetStyles, elementStyles, styles$1D];
+__decorate$28([
   n$6()
 ], WuiInputElement.prototype, "icon", void 0);
-WuiInputElement = __decorate$25([
+WuiInputElement = __decorate$28([
   customElement("wui-input-element")
 ], WuiInputElement);
 
-const styles$1z = i$5`
+const styles$1C = i$5`
   :host {
     position: relative;
     display: inline-block;
@@ -8343,7 +8758,7 @@ const styles$1z = i$5`
   }
 `;
 
-var __decorate$24 = function(decorators, target, key, desc) {
+var __decorate$27 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8370,18 +8785,18 @@ let WuiInputNumeric = class WuiInputNumeric2 extends s$2 {
     /> `;
   }
 };
-WuiInputNumeric.styles = [resetStyles, elementStyles, styles$1z];
-__decorate$24([
+WuiInputNumeric.styles = [resetStyles, elementStyles, styles$1C];
+__decorate$27([
   n$6({ type: Boolean })
 ], WuiInputNumeric.prototype, "disabled", void 0);
-__decorate$24([
+__decorate$27([
   n$6({ type: String })
 ], WuiInputNumeric.prototype, "value", void 0);
-WuiInputNumeric = __decorate$24([
+WuiInputNumeric = __decorate$27([
   customElement("wui-input-numeric")
 ], WuiInputNumeric);
 
-const styles$1y = i$5`
+const styles$1B = i$5`
   button {
     padding: var(--wui-spacing-4xs) var(--wui-spacing-xxs);
     border-radius: var(--wui-border-radius-3xs);
@@ -8399,7 +8814,7 @@ const styles$1y = i$5`
   }
 `;
 
-var __decorate$23 = function(decorators, target, key, desc) {
+var __decorate$26 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8427,18 +8842,18 @@ let WuiLink = class WuiLink2 extends s$2 {
     `;
   }
 };
-WuiLink.styles = [resetStyles, elementStyles, styles$1y];
-__decorate$23([
+WuiLink.styles = [resetStyles, elementStyles, styles$1B];
+__decorate$26([
   n$6({ type: Boolean })
 ], WuiLink.prototype, "disabled", void 0);
-__decorate$23([
+__decorate$26([
   n$6()
 ], WuiLink.prototype, "color", void 0);
-WuiLink = __decorate$23([
+WuiLink = __decorate$26([
   customElement("wui-link")
 ], WuiLink);
 
-const styles$1x = i$5`
+const styles$1A = i$5`
   button {
     column-gap: var(--wui-spacing-s);
     padding: 11px 18px 11px var(--wui-spacing-s);
@@ -8529,7 +8944,7 @@ const styles$1x = i$5`
   }
 `;
 
-var __decorate$22 = function(decorators, target, key, desc) {
+var __decorate$25 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8603,35 +9018,35 @@ let WuiListItem = class WuiListItem2 extends s$2 {
     return null;
   }
 };
-WuiListItem.styles = [resetStyles, elementStyles, styles$1x];
-__decorate$22([
+WuiListItem.styles = [resetStyles, elementStyles, styles$1A];
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "icon", void 0);
-__decorate$22([
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "iconSize", void 0);
-__decorate$22([
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "variant", void 0);
-__decorate$22([
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "iconVariant", void 0);
-__decorate$22([
+__decorate$25([
   n$6({ type: Boolean })
 ], WuiListItem.prototype, "disabled", void 0);
-__decorate$22([
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "imageSrc", void 0);
-__decorate$22([
+__decorate$25([
   n$6()
 ], WuiListItem.prototype, "alt", void 0);
-__decorate$22([
+__decorate$25([
   n$6({ type: Boolean })
 ], WuiListItem.prototype, "chevron", void 0);
-__decorate$22([
+__decorate$25([
   n$6({ type: Boolean })
 ], WuiListItem.prototype, "loading", void 0);
-WuiListItem = __decorate$22([
+WuiListItem = __decorate$25([
   customElement("wui-list-item")
 ], WuiListItem);
 
@@ -8657,7 +9072,7 @@ var TransactionTypePastTense;
   TransactionTypePastTense2["withdraw"] = "withdrawn";
 })(TransactionTypePastTense || (TransactionTypePastTense = {}));
 
-const styles$1w = i$5`
+const styles$1z = i$5`
   :host > wui-flex {
     display: flex;
     justify-content: center;
@@ -8717,7 +9132,7 @@ const styles$1w = i$5`
   }
 `;
 
-var __decorate$21 = function(decorators, target, key, desc) {
+var __decorate$24 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8822,30 +9237,30 @@ let WuiTransactionVisual = class WuiTransactionVisual2 extends s$2 {
     }
   }
 };
-WuiTransactionVisual.styles = [styles$1w];
-__decorate$21([
+WuiTransactionVisual.styles = [styles$1z];
+__decorate$24([
   n$6()
 ], WuiTransactionVisual.prototype, "type", void 0);
-__decorate$21([
+__decorate$24([
   n$6()
 ], WuiTransactionVisual.prototype, "status", void 0);
-__decorate$21([
+__decorate$24([
   n$6()
 ], WuiTransactionVisual.prototype, "direction", void 0);
-__decorate$21([
+__decorate$24([
   n$6({ type: Boolean })
 ], WuiTransactionVisual.prototype, "onlyDirectionIcon", void 0);
-__decorate$21([
+__decorate$24([
   n$6({ type: Array })
 ], WuiTransactionVisual.prototype, "images", void 0);
-__decorate$21([
+__decorate$24([
   n$6({ type: Object })
 ], WuiTransactionVisual.prototype, "secondImage", void 0);
-WuiTransactionVisual = __decorate$21([
+WuiTransactionVisual = __decorate$24([
   customElement("wui-transaction-visual")
 ], WuiTransactionVisual);
 
-const styles$1v = i$5`
+const styles$1y = i$5`
   :host > wui-flex:first-child {
     align-items: center;
     column-gap: var(--wui-spacing-s);
@@ -8890,7 +9305,7 @@ const styles$1v = i$5`
   }
 `;
 
-var __decorate$20 = function(decorators, target, key, desc) {
+var __decorate$23 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -8950,42 +9365,42 @@ let WuiTransactionListItem = class WuiTransactionListItem2 extends s$2 {
         ` : null;
   }
 };
-WuiTransactionListItem.styles = [resetStyles, styles$1v];
-__decorate$20([
+WuiTransactionListItem.styles = [resetStyles, styles$1y];
+__decorate$23([
   n$6()
 ], WuiTransactionListItem.prototype, "type", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Array })
 ], WuiTransactionListItem.prototype, "descriptions", void 0);
-__decorate$20([
+__decorate$23([
   n$6()
 ], WuiTransactionListItem.prototype, "date", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Boolean })
 ], WuiTransactionListItem.prototype, "onlyDirectionIcon", void 0);
-__decorate$20([
+__decorate$23([
   n$6()
 ], WuiTransactionListItem.prototype, "status", void 0);
-__decorate$20([
+__decorate$23([
   n$6()
 ], WuiTransactionListItem.prototype, "direction", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Array })
 ], WuiTransactionListItem.prototype, "images", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Array })
 ], WuiTransactionListItem.prototype, "price", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Array })
 ], WuiTransactionListItem.prototype, "amount", void 0);
-__decorate$20([
+__decorate$23([
   n$6({ type: Array })
 ], WuiTransactionListItem.prototype, "symbol", void 0);
-WuiTransactionListItem = __decorate$20([
+WuiTransactionListItem = __decorate$23([
   customElement("wui-transaction-list-item")
 ], WuiTransactionListItem);
 
-const styles$1u = i$5`
+const styles$1x = i$5`
   :host > wui-flex:first-child {
     column-gap: var(--wui-spacing-s);
     padding: 7px var(--wui-spacing-l) 7px var(--wui-spacing-xs);
@@ -8998,7 +9413,7 @@ const styles$1u = i$5`
   }
 `;
 
-var __decorate$1$ = function(decorators, target, key, desc) {
+var __decorate$22 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9022,12 +9437,12 @@ let WuiTransactionListItemLoader = class WuiTransactionListItemLoader2 extends s
     `;
   }
 };
-WuiTransactionListItemLoader.styles = [resetStyles, styles$1u];
-WuiTransactionListItemLoader = __decorate$1$([
+WuiTransactionListItemLoader.styles = [resetStyles, styles$1x];
+WuiTransactionListItemLoader = __decorate$22([
   customElement("wui-transaction-list-item-loader")
 ], WuiTransactionListItemLoader);
 
-const styles$1t = i$5`
+const styles$1w = i$5`
   :host {
     display: flex;
     justify-content: center;
@@ -9062,7 +9477,7 @@ const styles$1t = i$5`
   }
 
   :host([data-size='lg']) {
-    padding: 9px 5px !important;
+    padding: 11px 5px !important;
   }
 
   :host([data-size='lg']) > wui-text {
@@ -9070,7 +9485,7 @@ const styles$1t = i$5`
   }
 `;
 
-var __decorate$1_ = function(decorators, target, key, desc) {
+var __decorate$21 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9097,18 +9512,18 @@ let WuiTag = class WuiTag2 extends s$2 {
     `;
   }
 };
-WuiTag.styles = [resetStyles, styles$1t];
-__decorate$1_([
+WuiTag.styles = [resetStyles, styles$1w];
+__decorate$21([
   n$6()
 ], WuiTag.prototype, "variant", void 0);
-__decorate$1_([
+__decorate$21([
   n$6()
 ], WuiTag.prototype, "size", void 0);
-WuiTag = __decorate$1_([
+WuiTag = __decorate$21([
   customElement("wui-tag")
 ], WuiTag);
 
-const styles$1s = i$5`
+const styles$1v = i$5`
   button {
     column-gap: var(--wui-spacing-s);
     padding: 7px var(--wui-spacing-l) 7px var(--wui-spacing-xs);
@@ -9142,7 +9557,7 @@ const styles$1s = i$5`
   }
 `;
 
-var __decorate$1Z = function(decorators, target, key, desc) {
+var __decorate$20 = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9201,42 +9616,42 @@ let WuiListWallet = class WuiListWallet2 extends s$2 {
     return null;
   }
 };
-WuiListWallet.styles = [resetStyles, elementStyles, styles$1s];
-__decorate$1Z([
+WuiListWallet.styles = [resetStyles, elementStyles, styles$1v];
+__decorate$20([
   n$6({ type: Array })
 ], WuiListWallet.prototype, "walletImages", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "imageSrc", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "name", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "tagLabel", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "tagVariant", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "icon", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6()
 ], WuiListWallet.prototype, "walletIcon", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6({ type: Boolean })
 ], WuiListWallet.prototype, "installed", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6({ type: Boolean })
 ], WuiListWallet.prototype, "disabled", void 0);
-__decorate$1Z([
+__decorate$20([
   n$6({ type: Boolean })
 ], WuiListWallet.prototype, "showAllWallets", void 0);
-WuiListWallet = __decorate$1Z([
+WuiListWallet = __decorate$20([
   customElement("wui-list-wallet")
 ], WuiListWallet);
 
-const styles$1r = i$5`
+const styles$1u = i$5`
   :host {
     display: flex;
     justify-content: center;
@@ -9254,7 +9669,7 @@ const styles$1r = i$5`
   }
 `;
 
-var __decorate$1Y = function(decorators, target, key, desc) {
+var __decorate$1$ = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9273,15 +9688,15 @@ let WuiLogo = class WuiLogo2 extends s$2 {
     return x$2`<wui-icon color="inherit" size="inherit" name=${this.logo}></wui-icon> `;
   }
 };
-WuiLogo.styles = [resetStyles, styles$1r];
-__decorate$1Y([
+WuiLogo.styles = [resetStyles, styles$1u];
+__decorate$1$([
   n$6()
 ], WuiLogo.prototype, "logo", void 0);
-WuiLogo = __decorate$1Y([
+WuiLogo = __decorate$1$([
   customElement("wui-logo")
 ], WuiLogo);
 
-const styles$1q = i$5`
+const styles$1t = i$5`
   :host {
     display: block;
     width: 100%;
@@ -9295,7 +9710,7 @@ const styles$1q = i$5`
   }
 `;
 
-var __decorate$1X = function(decorators, target, key, desc) {
+var __decorate$1_ = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9319,18 +9734,18 @@ let WuiLogoSelect = class WuiLogoSelect2 extends s$2 {
     `;
   }
 };
-WuiLogoSelect.styles = [resetStyles, elementStyles, styles$1q];
-__decorate$1X([
+WuiLogoSelect.styles = [resetStyles, elementStyles, styles$1t];
+__decorate$1_([
   n$6()
 ], WuiLogoSelect.prototype, "logo", void 0);
-__decorate$1X([
+__decorate$1_([
   n$6({ type: Boolean })
 ], WuiLogoSelect.prototype, "disabled", void 0);
-WuiLogoSelect = __decorate$1X([
+WuiLogoSelect = __decorate$1_([
   customElement("wui-logo-select")
 ], WuiLogoSelect);
 
-const styles$1p = i$5`
+const styles$1s = i$5`
   :host {
     display: block;
   }
@@ -9371,7 +9786,7 @@ const styles$1p = i$5`
   }
 `;
 
-var __decorate$1W = function(decorators, target, key, desc) {
+var __decorate$1Z = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9422,28 +9837,28 @@ let WuiNetworkButton = class WuiNetworkButton2 extends s$2 {
     `;
   }
 };
-WuiNetworkButton.styles = [resetStyles, elementStyles, styles$1p];
-__decorate$1W([
+WuiNetworkButton.styles = [resetStyles, elementStyles, styles$1s];
+__decorate$1Z([
   n$6()
 ], WuiNetworkButton.prototype, "imageSrc", void 0);
-__decorate$1W([
+__decorate$1Z([
   n$6({ type: Boolean })
 ], WuiNetworkButton.prototype, "isUnsupportedChain", void 0);
-__decorate$1W([
+__decorate$1Z([
   n$6({ type: Boolean })
 ], WuiNetworkButton.prototype, "disabled", void 0);
-WuiNetworkButton = __decorate$1W([
+WuiNetworkButton = __decorate$1Z([
   customElement("wui-network-button")
 ], WuiNetworkButton);
 
-const styles$1o = i$5`
+const styles$1r = i$5`
   :host {
     position: relative;
     display: block;
   }
 `;
 
-var __decorate$1V = function(decorators, target, key, desc) {
+var __decorate$1Y = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9621,17 +10036,17 @@ let WuiOtp = class WuiOtp2 extends s$2 {
     }));
   }
 };
-WuiOtp.styles = [resetStyles, styles$1o];
-__decorate$1V([
+WuiOtp.styles = [resetStyles, styles$1r];
+__decorate$1Y([
   n$6({ type: Number })
 ], WuiOtp.prototype, "length", void 0);
-__decorate$1V([
+__decorate$1Y([
   n$6({ type: String })
 ], WuiOtp.prototype, "otp", void 0);
-__decorate$1V([
+__decorate$1Y([
   r$3()
 ], WuiOtp.prototype, "values", void 0);
-WuiOtp = __decorate$1V([
+WuiOtp = __decorate$1Y([
   customElement("wui-otp")
 ], WuiOtp);
 
@@ -9751,7 +10166,7 @@ const QrCodeUtil = {
   }
 };
 
-const styles$1n = i$5`
+const styles$1q = i$5`
   :host {
     position: relative;
     user-select: none;
@@ -9799,7 +10214,7 @@ const styles$1n = i$5`
   }
 `;
 
-var __decorate$1U = function(decorators, target, key, desc) {
+var __decorate$1X = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9840,30 +10255,30 @@ let WuiQrCode = class WuiQrCode2 extends s$2 {
     return x$2`<wui-icon size="inherit" color="inherit" name="walletConnect"></wui-icon>`;
   }
 };
-WuiQrCode.styles = [resetStyles, styles$1n];
-__decorate$1U([
+WuiQrCode.styles = [resetStyles, styles$1q];
+__decorate$1X([
   n$6()
 ], WuiQrCode.prototype, "uri", void 0);
-__decorate$1U([
+__decorate$1X([
   n$6({ type: Number })
 ], WuiQrCode.prototype, "size", void 0);
-__decorate$1U([
+__decorate$1X([
   n$6()
 ], WuiQrCode.prototype, "theme", void 0);
-__decorate$1U([
+__decorate$1X([
   n$6()
 ], WuiQrCode.prototype, "imageSrc", void 0);
-__decorate$1U([
+__decorate$1X([
   n$6()
 ], WuiQrCode.prototype, "alt", void 0);
-__decorate$1U([
+__decorate$1X([
   n$6({ type: Boolean })
 ], WuiQrCode.prototype, "arenaClear", void 0);
-WuiQrCode = __decorate$1U([
+WuiQrCode = __decorate$1X([
   customElement("wui-qr-code")
 ], WuiQrCode);
 
-const styles$1m = i$5`
+const styles$1p = i$5`
   :host {
     position: relative;
     display: inline-block;
@@ -9871,7 +10286,7 @@ const styles$1m = i$5`
   }
 `;
 
-var __decorate$1T = function(decorators, target, key, desc) {
+var __decorate$1W = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9910,12 +10325,12 @@ let WuiSearchBar = class WuiSearchBar2 extends s$2 {
     }
   }
 };
-WuiSearchBar.styles = [resetStyles, styles$1m];
-WuiSearchBar = __decorate$1T([
+WuiSearchBar.styles = [resetStyles, styles$1p];
+WuiSearchBar = __decorate$1W([
   customElement("wui-search-bar")
 ], WuiSearchBar);
 
-const styles$1l = i$5`
+const styles$1o = i$5`
   :host {
     display: flex;
     column-gap: var(--wui-spacing-xs);
@@ -9932,7 +10347,7 @@ const styles$1l = i$5`
   }
 `;
 
-var __decorate$1S = function(decorators, target, key, desc) {
+var __decorate$1V = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -9964,24 +10379,24 @@ let WuiSnackbar = class WuiSnackbar2 extends s$2 {
     `;
   }
 };
-WuiSnackbar.styles = [resetStyles, styles$1l];
-__decorate$1S([
+WuiSnackbar.styles = [resetStyles, styles$1o];
+__decorate$1V([
   n$6()
 ], WuiSnackbar.prototype, "backgroundColor", void 0);
-__decorate$1S([
+__decorate$1V([
   n$6()
 ], WuiSnackbar.prototype, "iconColor", void 0);
-__decorate$1S([
+__decorate$1V([
   n$6()
 ], WuiSnackbar.prototype, "icon", void 0);
-__decorate$1S([
+__decorate$1V([
   n$6()
 ], WuiSnackbar.prototype, "message", void 0);
-WuiSnackbar = __decorate$1S([
+WuiSnackbar = __decorate$1V([
   customElement("wui-snackbar")
 ], WuiSnackbar);
 
-const styles$1k = i$5`
+const styles$1n = i$5`
   :host {
     display: inline-flex;
     background-color: var(--wui-color-gray-glass-002);
@@ -10091,7 +10506,7 @@ const styles$1k = i$5`
   }
 `;
 
-var __decorate$1R = function(decorators, target, key, desc) {
+var __decorate$1U = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10192,33 +10607,33 @@ let WuiTabs = class WuiTabs2 extends s$2 {
     }
   }
 };
-WuiTabs.styles = [resetStyles, elementStyles, styles$1k];
-__decorate$1R([
+WuiTabs.styles = [resetStyles, elementStyles, styles$1n];
+__decorate$1U([
   n$6({ type: Array })
 ], WuiTabs.prototype, "tabs", void 0);
-__decorate$1R([
+__decorate$1U([
   n$6()
 ], WuiTabs.prototype, "onTabChange", void 0);
-__decorate$1R([
+__decorate$1U([
   n$6({ type: Array })
 ], WuiTabs.prototype, "buttons", void 0);
-__decorate$1R([
+__decorate$1U([
   n$6({ type: Boolean })
 ], WuiTabs.prototype, "disabled", void 0);
-__decorate$1R([
+__decorate$1U([
   n$6()
 ], WuiTabs.prototype, "localTabWidth", void 0);
-__decorate$1R([
+__decorate$1U([
   r$3()
 ], WuiTabs.prototype, "activeTab", void 0);
-__decorate$1R([
+__decorate$1U([
   r$3()
 ], WuiTabs.prototype, "isDense", void 0);
-WuiTabs = __decorate$1R([
+WuiTabs = __decorate$1U([
   customElement("wui-tabs")
 ], WuiTabs);
 
-const styles$1j = i$5`
+const styles$1m = i$5`
   :host {
     display: block;
   }
@@ -10242,7 +10657,7 @@ const styles$1j = i$5`
   }
 `;
 
-var __decorate$1Q = function(decorators, target, key, desc) {
+var __decorate$1T = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10279,18 +10694,18 @@ let WuiTokenButton = class WuiTokenButton2 extends s$2 {
     `;
   }
 };
-WuiTokenButton.styles = [resetStyles, elementStyles, styles$1j];
-__decorate$1Q([
+WuiTokenButton.styles = [resetStyles, elementStyles, styles$1m];
+__decorate$1T([
   n$6()
 ], WuiTokenButton.prototype, "imageSrc", void 0);
-__decorate$1Q([
+__decorate$1T([
   n$6()
 ], WuiTokenButton.prototype, "text", void 0);
-WuiTokenButton = __decorate$1Q([
+WuiTokenButton = __decorate$1T([
   customElement("wui-token-button")
 ], WuiTokenButton);
 
-const styles$1i = i$5`
+const styles$1l = i$5`
   :host {
     display: block;
     padding: 9px var(--wui-spacing-s) 10px var(--wui-spacing-s);
@@ -10345,7 +10760,7 @@ const styles$1i = i$5`
   }
 `;
 
-var __decorate$1P = function(decorators, target, key, desc) {
+var __decorate$1S = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10373,21 +10788,21 @@ let WuiTooltip = class WuiTooltip2 extends s$2 {
       <wui-text color="inherit" variant="small-500">${this.message}</wui-text>`;
   }
 };
-WuiTooltip.styles = [resetStyles, elementStyles, styles$1i];
-__decorate$1P([
+WuiTooltip.styles = [resetStyles, elementStyles, styles$1l];
+__decorate$1S([
   n$6()
 ], WuiTooltip.prototype, "placement", void 0);
-__decorate$1P([
+__decorate$1S([
   n$6()
 ], WuiTooltip.prototype, "variant", void 0);
-__decorate$1P([
+__decorate$1S([
   n$6()
 ], WuiTooltip.prototype, "message", void 0);
-WuiTooltip = __decorate$1P([
+WuiTooltip = __decorate$1S([
   customElement("wui-tooltip")
 ], WuiTooltip);
 
-const styles$1h = i$5`
+const styles$1k = i$5`
   :host > wui-flex {
     cursor: pointer;
     display: flex;
@@ -10441,7 +10856,7 @@ const styles$1h = i$5`
   }
 `;
 
-var __decorate$1O = function(decorators, target, key, desc) {
+var __decorate$1R = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10491,27 +10906,27 @@ let WuiTokenListItem = class WuiTokenListItem2 extends s$2 {
     return null;
   }
 };
-WuiTokenListItem.styles = [resetStyles, elementStyles, styles$1h];
-__decorate$1O([
+WuiTokenListItem.styles = [resetStyles, elementStyles, styles$1k];
+__decorate$1R([
   n$6()
 ], WuiTokenListItem.prototype, "imageSrc", void 0);
-__decorate$1O([
+__decorate$1R([
   n$6()
 ], WuiTokenListItem.prototype, "name", void 0);
-__decorate$1O([
+__decorate$1R([
   n$6()
 ], WuiTokenListItem.prototype, "symbol", void 0);
-__decorate$1O([
+__decorate$1R([
   n$6()
 ], WuiTokenListItem.prototype, "price", void 0);
-__decorate$1O([
+__decorate$1R([
   n$6()
 ], WuiTokenListItem.prototype, "amount", void 0);
-WuiTokenListItem = __decorate$1O([
+WuiTokenListItem = __decorate$1R([
   customElement("wui-token-list-item")
 ], WuiTokenListItem);
 
-const styles$1g = i$5`
+const styles$1j = i$5`
   :host {
     display: flex;
     justify-content: center;
@@ -10529,7 +10944,7 @@ const styles$1g = i$5`
   }
 `;
 
-var __decorate$1N = function(decorators, target, key, desc) {
+var __decorate$1Q = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10556,21 +10971,21 @@ let WuiVisualThumbnail = class WuiVisualThumbnail2 extends s$2 {
     ></wui-icon>`;
   }
 };
-WuiVisualThumbnail.styles = [resetStyles, styles$1g];
-__decorate$1N([
+WuiVisualThumbnail.styles = [resetStyles, styles$1j];
+__decorate$1Q([
   n$6()
 ], WuiVisualThumbnail.prototype, "imageSrc", void 0);
-__decorate$1N([
+__decorate$1Q([
   n$6()
 ], WuiVisualThumbnail.prototype, "alt", void 0);
-__decorate$1N([
+__decorate$1Q([
   n$6({ type: Boolean })
 ], WuiVisualThumbnail.prototype, "borderRadiusFull", void 0);
-WuiVisualThumbnail = __decorate$1N([
+WuiVisualThumbnail = __decorate$1Q([
   customElement("wui-visual-thumbnail")
 ], WuiVisualThumbnail);
 
-const styles$1f = i$5`
+const styles$1i = i$5`
   :host {
     display: block;
   }
@@ -10595,7 +11010,7 @@ const styles$1f = i$5`
   }
 `;
 
-var __decorate$1M = function(decorators, target, key, desc) {
+var __decorate$1P = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10635,21 +11050,21 @@ let WuiNoticeCard = class WuiNoticeCard2 extends s$2 {
     `;
   }
 };
-WuiNoticeCard.styles = [resetStyles, elementStyles, styles$1f];
-__decorate$1M([
+WuiNoticeCard.styles = [resetStyles, elementStyles, styles$1i];
+__decorate$1P([
   n$6()
 ], WuiNoticeCard.prototype, "label", void 0);
-__decorate$1M([
+__decorate$1P([
   n$6()
 ], WuiNoticeCard.prototype, "description", void 0);
-__decorate$1M([
+__decorate$1P([
   n$6()
 ], WuiNoticeCard.prototype, "icon", void 0);
-WuiNoticeCard = __decorate$1M([
+WuiNoticeCard = __decorate$1P([
   customElement("wui-notice-card")
 ], WuiNoticeCard);
 
-const styles$1e = i$5`
+const styles$1h = i$5`
   button {
     height: auto;
     position: relative;
@@ -10692,7 +11107,7 @@ const styles$1e = i$5`
   }
 `;
 
-var __decorate$1L = function(decorators, target, key, desc) {
+var __decorate$1O = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10790,18 +11205,18 @@ let WuiListAccordion = class WuiListAccordion2 extends s$2 {
     return null;
   }
 };
-WuiListAccordion.styles = [resetStyles, elementStyles, styles$1e];
-__decorate$1L([
+WuiListAccordion.styles = [resetStyles, elementStyles, styles$1h];
+__decorate$1O([
   n$6()
 ], WuiListAccordion.prototype, "textTitle", void 0);
-__decorate$1L([
+__decorate$1O([
   n$6()
 ], WuiListAccordion.prototype, "overflowedContent", void 0);
-WuiListAccordion = __decorate$1L([
+WuiListAccordion = __decorate$1O([
   customElement("wui-list-accordion")
 ], WuiListAccordion);
 
-const styles$1d = i$5`
+const styles$1g = i$5`
   :host {
     display: flex;
     column-gap: var(--wui-spacing-s);
@@ -10824,7 +11239,7 @@ const styles$1d = i$5`
   }
 `;
 
-var __decorate$1K = function(decorators, target, key, desc) {
+var __decorate$1N = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10860,21 +11275,21 @@ let WuiListContent = class WuiListContent2 extends s$2 {
     return x$2`<wui-icon size="inherit" color="fg-200" name="networkPlaceholder"></wui-icon>`;
   }
 };
-WuiListContent.styles = [resetStyles, elementStyles, styles$1d];
-__decorate$1K([
+WuiListContent.styles = [resetStyles, elementStyles, styles$1g];
+__decorate$1N([
   n$6()
 ], WuiListContent.prototype, "imageSrc", void 0);
-__decorate$1K([
+__decorate$1N([
   n$6()
 ], WuiListContent.prototype, "textTitle", void 0);
-__decorate$1K([
+__decorate$1N([
   n$6()
 ], WuiListContent.prototype, "textValue", void 0);
-WuiListContent = __decorate$1K([
+WuiListContent = __decorate$1N([
   customElement("wui-list-content")
 ], WuiListContent);
 
-const styles$1c = i$5`
+const styles$1f = i$5`
   button {
     column-gap: var(--wui-spacing-s);
     padding: 7px var(--wui-spacing-l) 7px var(--wui-spacing-xs);
@@ -10909,7 +11324,7 @@ const styles$1c = i$5`
   }
 `;
 
-var __decorate$1J = function(decorators, target, key, desc) {
+var __decorate$1M = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -10949,24 +11364,24 @@ let WuiListNetwork = class WuiListNetwork2 extends s$2 {
     return null;
   }
 };
-WuiListNetwork.styles = [resetStyles, elementStyles, styles$1c];
-__decorate$1J([
+WuiListNetwork.styles = [resetStyles, elementStyles, styles$1f];
+__decorate$1M([
   n$6()
 ], WuiListNetwork.prototype, "imageSrc", void 0);
-__decorate$1J([
+__decorate$1M([
   n$6()
 ], WuiListNetwork.prototype, "name", void 0);
-__decorate$1J([
+__decorate$1M([
   n$6({ type: Boolean })
 ], WuiListNetwork.prototype, "disabled", void 0);
-__decorate$1J([
+__decorate$1M([
   n$6({ type: Boolean })
 ], WuiListNetwork.prototype, "transparent", void 0);
-WuiListNetwork = __decorate$1J([
+WuiListNetwork = __decorate$1M([
   customElement("wui-list-network")
 ], WuiListNetwork);
 
-const styles$1b = i$5`
+const styles$1e = i$5`
   :host {
     display: flex;
     flex-direction: column;
@@ -10990,7 +11405,7 @@ const styles$1b = i$5`
   }
 `;
 
-var __decorate$1I = function(decorators, target, key, desc) {
+var __decorate$1L = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11038,27 +11453,27 @@ let WuiListWalletTransaction = class WuiListWalletTransaction2 extends s$2 {
     return x$2`<wui-icon size="inherit" color="fg-200" name="networkPlaceholder"></wui-icon>`;
   }
 };
-WuiListWalletTransaction.styles = [resetStyles, elementStyles, styles$1b];
-__decorate$1I([
+WuiListWalletTransaction.styles = [resetStyles, elementStyles, styles$1e];
+__decorate$1L([
   n$6()
 ], WuiListWalletTransaction.prototype, "amount", void 0);
-__decorate$1I([
+__decorate$1L([
   n$6()
 ], WuiListWalletTransaction.prototype, "networkCurreny", void 0);
-__decorate$1I([
+__decorate$1L([
   n$6()
 ], WuiListWalletTransaction.prototype, "networkImageUrl", void 0);
-__decorate$1I([
+__decorate$1L([
   n$6()
 ], WuiListWalletTransaction.prototype, "receiverAddress", void 0);
-__decorate$1I([
+__decorate$1L([
   n$6()
 ], WuiListWalletTransaction.prototype, "addressExplorerUrl", void 0);
-WuiListWalletTransaction = __decorate$1I([
+WuiListWalletTransaction = __decorate$1L([
   customElement("wui-list-wallet-transaction")
 ], WuiListWalletTransaction);
 
-const styles$1a = i$5`
+const styles$1d = i$5`
   :host {
     width: 100%;
   }
@@ -11113,7 +11528,7 @@ const styles$1a = i$5`
   }
 `;
 
-var __decorate$1H = function(decorators, target, key, desc) {
+var __decorate$1K = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11196,48 +11611,48 @@ let WuiOnRampActivityItem = class WuiOnRampActivityItem2 extends s$2 {
     ></wui-icon-box>`;
   }
 };
-WuiOnRampActivityItem.styles = [resetStyles, elementStyles, styles$1a];
-__decorate$1H([
+WuiOnRampActivityItem.styles = [resetStyles, elementStyles, styles$1d];
+__decorate$1K([
   n$6({ type: Boolean })
 ], WuiOnRampActivityItem.prototype, "disabled", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "color", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "label", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "purchaseValue", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "purchaseCurrency", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "date", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6({ type: Boolean })
 ], WuiOnRampActivityItem.prototype, "completed", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6({ type: Boolean })
 ], WuiOnRampActivityItem.prototype, "inProgress", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6({ type: Boolean })
 ], WuiOnRampActivityItem.prototype, "failed", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "onClick", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "symbol", void 0);
-__decorate$1H([
+__decorate$1K([
   n$6()
 ], WuiOnRampActivityItem.prototype, "icon", void 0);
-WuiOnRampActivityItem = __decorate$1H([
+WuiOnRampActivityItem = __decorate$1K([
   customElement("wui-onramp-activity-item")
 ], WuiOnRampActivityItem);
 
-const styles$19 = i$5`
+const styles$1c = i$5`
   button {
     padding: var(--wui-spacing-s);
     border-radius: var(--wui-border-radius-xs);
@@ -11294,7 +11709,7 @@ const styles$19 = i$5`
   }
 `;
 
-var __decorate$1G = function(decorators, target, key, desc) {
+var __decorate$1J = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11350,33 +11765,33 @@ let WuiOnRampProviderItem = class WuiOnRampProviderItem2 extends s$2 {
     `;
   }
 };
-WuiOnRampProviderItem.styles = [resetStyles, elementStyles, styles$19];
-__decorate$1G([
+WuiOnRampProviderItem.styles = [resetStyles, elementStyles, styles$1c];
+__decorate$1J([
   n$6({ type: Boolean })
 ], WuiOnRampProviderItem.prototype, "disabled", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6()
 ], WuiOnRampProviderItem.prototype, "color", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6()
 ], WuiOnRampProviderItem.prototype, "name", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6()
 ], WuiOnRampProviderItem.prototype, "label", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6()
 ], WuiOnRampProviderItem.prototype, "feeRange", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6({ type: Boolean })
 ], WuiOnRampProviderItem.prototype, "loading", void 0);
-__decorate$1G([
+__decorate$1J([
   n$6()
 ], WuiOnRampProviderItem.prototype, "onClick", void 0);
-WuiOnRampProviderItem = __decorate$1G([
+WuiOnRampProviderItem = __decorate$1J([
   customElement("wui-onramp-provider-item")
 ], WuiOnRampProviderItem);
 
-const styles$18 = i$5`
+const styles$1b = i$5`
   button {
     display: flex;
     gap: var(--wui-spacing-3xs);
@@ -11400,7 +11815,7 @@ const styles$18 = i$5`
   }
 `;
 
-var __decorate$1F = function(decorators, target, key, desc) {
+var __decorate$1I = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11422,15 +11837,15 @@ let WuiPromo = class WuiPromo2 extends s$2 {
     </button>`;
   }
 };
-WuiPromo.styles = [resetStyles, elementStyles, styles$18];
-__decorate$1F([
+WuiPromo.styles = [resetStyles, elementStyles, styles$1b];
+__decorate$1I([
   n$6()
 ], WuiPromo.prototype, "text", void 0);
-WuiPromo = __decorate$1F([
+WuiPromo = __decorate$1I([
   customElement("wui-promo")
 ], WuiPromo);
 
-const styles$17 = i$5`
+const styles$1a = i$5`
   span {
     font-weight: 500;
     font-size: 40px;
@@ -11445,7 +11860,7 @@ const styles$17 = i$5`
   }
 `;
 
-var __decorate$1E = function(decorators, target, key, desc) {
+var __decorate$1H = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11465,18 +11880,18 @@ let WuiBalance = class WuiBalance2 extends s$2 {
     return x$2`<span>$${this.dollars}<span class="pennies">.${this.pennies}</span></span>`;
   }
 };
-WuiBalance.styles = [resetStyles, styles$17];
-__decorate$1E([
+WuiBalance.styles = [resetStyles, styles$1a];
+__decorate$1H([
   n$6()
 ], WuiBalance.prototype, "dollars", void 0);
-__decorate$1E([
+__decorate$1H([
   n$6()
 ], WuiBalance.prototype, "pennies", void 0);
-WuiBalance = __decorate$1E([
+WuiBalance = __decorate$1H([
   customElement("wui-balance")
 ], WuiBalance);
 
-const styles$16 = i$5`
+const styles$19 = i$5`
   button {
     background-color: var(--wui-color-gray-glass-002);
     border-radius: var(--wui-border-radius-3xl);
@@ -11512,7 +11927,7 @@ const styles$16 = i$5`
   }
 `;
 
-var __decorate$1D = function(decorators, target, key, desc) {
+var __decorate$1G = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11568,27 +11983,27 @@ let WuiProfileButton = class WuiProfileButton2 extends s$2 {
     `;
   }
 };
-WuiProfileButton.styles = [resetStyles, elementStyles, styles$16];
-__decorate$1D([
+WuiProfileButton.styles = [resetStyles, elementStyles, styles$19];
+__decorate$1G([
   n$6()
 ], WuiProfileButton.prototype, "networkSrc", void 0);
-__decorate$1D([
+__decorate$1G([
   n$6()
 ], WuiProfileButton.prototype, "avatarSrc", void 0);
-__decorate$1D([
+__decorate$1G([
   n$6()
 ], WuiProfileButton.prototype, "profileName", void 0);
-__decorate$1D([
+__decorate$1G([
   n$6()
 ], WuiProfileButton.prototype, "address", void 0);
-__decorate$1D([
+__decorate$1G([
   n$6()
 ], WuiProfileButton.prototype, "icon", void 0);
-WuiProfileButton = __decorate$1D([
+WuiProfileButton = __decorate$1G([
   customElement("wui-profile-button")
 ], WuiProfileButton);
 
-const styles$15 = i$5`
+const styles$18 = i$5`
   button {
     border: none;
     border-radius: var(--wui-border-radius-3xl);
@@ -11693,7 +12108,7 @@ const styles$15 = i$5`
   }
 `;
 
-var __decorate$1C = function(decorators, target, key, desc) {
+var __decorate$1F = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11728,30 +12143,30 @@ let WuiChipButton = class WuiChipButton2 extends s$2 {
     `;
   }
 };
-WuiChipButton.styles = [resetStyles, elementStyles, styles$15];
-__decorate$1C([
+WuiChipButton.styles = [resetStyles, elementStyles, styles$18];
+__decorate$1F([
   n$6()
 ], WuiChipButton.prototype, "variant", void 0);
-__decorate$1C([
+__decorate$1F([
   n$6()
 ], WuiChipButton.prototype, "imageSrc", void 0);
-__decorate$1C([
+__decorate$1F([
   n$6({ type: Boolean })
 ], WuiChipButton.prototype, "disabled", void 0);
-__decorate$1C([
+__decorate$1F([
   n$6()
 ], WuiChipButton.prototype, "icon", void 0);
-__decorate$1C([
+__decorate$1F([
   n$6()
 ], WuiChipButton.prototype, "size", void 0);
-__decorate$1C([
+__decorate$1F([
   n$6()
 ], WuiChipButton.prototype, "text", void 0);
-WuiChipButton = __decorate$1C([
+WuiChipButton = __decorate$1F([
   customElement("wui-chip-button")
 ], WuiChipButton);
 
-const styles$14 = i$5`
+const styles$17 = i$5`
   button {
     display: flex;
     gap: var(--wui-spacing-xl);
@@ -11780,7 +12195,7 @@ const styles$14 = i$5`
   }
 `;
 
-var __decorate$1B = function(decorators, target, key, desc) {
+var __decorate$1E = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11814,18 +12229,18 @@ let WuiCompatibleNetwork = class WuiCompatibleNetwork2 extends s$2 {
     </wui-flex>`;
   }
 };
-WuiCompatibleNetwork.styles = [resetStyles, elementStyles, styles$14];
-__decorate$1B([
+WuiCompatibleNetwork.styles = [resetStyles, elementStyles, styles$17];
+__decorate$1E([
   n$6({ type: Array })
 ], WuiCompatibleNetwork.prototype, "networkImages", void 0);
-__decorate$1B([
+__decorate$1E([
   n$6()
 ], WuiCompatibleNetwork.prototype, "text", void 0);
-WuiCompatibleNetwork = __decorate$1B([
+WuiCompatibleNetwork = __decorate$1E([
   customElement("wui-compatible-network")
 ], WuiCompatibleNetwork);
 
-const styles$13 = i$5`
+const styles$16 = i$5`
   wui-flex {
     width: 100%;
     background-color: var(--wui-color-gray-glass-005);
@@ -11835,7 +12250,7 @@ const styles$13 = i$5`
   }
 `;
 
-var __decorate$1A = function(decorators, target, key, desc) {
+var __decorate$1D = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11866,18 +12281,18 @@ let WuiBanner = class WuiBanner2 extends s$2 {
     `;
   }
 };
-WuiBanner.styles = [resetStyles, elementStyles, styles$13];
-__decorate$1A([
+WuiBanner.styles = [resetStyles, elementStyles, styles$16];
+__decorate$1D([
   n$6()
 ], WuiBanner.prototype, "icon", void 0);
-__decorate$1A([
+__decorate$1D([
   n$6()
 ], WuiBanner.prototype, "text", void 0);
-WuiBanner = __decorate$1A([
+WuiBanner = __decorate$1D([
   customElement("wui-banner")
 ], WuiBanner);
 
-const styles$12 = i$5`
+const styles$15 = i$5`
   button {
     padding: 6.5px var(--wui-spacing-l) 6.5px var(--wui-spacing-xs);
     display: flex;
@@ -11903,7 +12318,7 @@ const styles$12 = i$5`
   }
 `;
 
-var __decorate$1z = function(decorators, target, key, desc) {
+var __decorate$1C = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -11946,30 +12361,30 @@ let WuiListToken = class WuiListToken2 extends s$2 {
     return x$2`<wui-icon name="coinPlaceholder" color="fg-100"></wui-icon>`;
   }
 };
-WuiListToken.styles = [resetStyles, elementStyles, styles$12];
-__decorate$1z([
+WuiListToken.styles = [resetStyles, elementStyles, styles$15];
+__decorate$1C([
   n$6()
 ], WuiListToken.prototype, "tokenName", void 0);
-__decorate$1z([
+__decorate$1C([
   n$6()
 ], WuiListToken.prototype, "tokenImageUrl", void 0);
-__decorate$1z([
+__decorate$1C([
   n$6({ type: Number })
 ], WuiListToken.prototype, "tokenValue", void 0);
-__decorate$1z([
+__decorate$1C([
   n$6()
 ], WuiListToken.prototype, "tokenAmount", void 0);
-__decorate$1z([
+__decorate$1C([
   n$6()
 ], WuiListToken.prototype, "tokenCurrency", void 0);
-__decorate$1z([
+__decorate$1C([
   n$6({ type: Boolean })
 ], WuiListToken.prototype, "clickable", void 0);
-WuiListToken = __decorate$1z([
+WuiListToken = __decorate$1C([
   customElement("wui-list-token")
 ], WuiListToken);
 
-const styles$11 = i$5`
+const styles$14 = i$5`
   button {
     width: 100%;
     display: flex;
@@ -11991,7 +12406,7 @@ const styles$11 = i$5`
   }
 `;
 
-var __decorate$1y = function(decorators, target, key, desc) {
+var __decorate$1B = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12039,33 +12454,33 @@ let WuiListDescription = class WuiListDescription2 extends s$2 {
     return x$2`<wui-text variant="paragraph-500" color="fg-100">${this.text}</wui-text>`;
   }
 };
-WuiListDescription.styles = [resetStyles, elementStyles, styles$11];
-__decorate$1y([
+WuiListDescription.styles = [resetStyles, elementStyles, styles$14];
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "icon", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "text", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "description", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "tag", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "iconBackgroundColor", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6()
 ], WuiListDescription.prototype, "iconColor", void 0);
-__decorate$1y([
+__decorate$1B([
   n$6({ type: Boolean })
 ], WuiListDescription.prototype, "disabled", void 0);
-WuiListDescription = __decorate$1y([
+WuiListDescription = __decorate$1B([
   customElement("wui-list-description")
 ], WuiListDescription);
 
-const styles$10 = i$5`
+const styles$13 = i$5`
   :host {
     position: relative;
     display: inline-block;
@@ -12104,7 +12519,7 @@ const styles$10 = i$5`
 const specialCharactersRegex = /[.*+?^${}()|[\]\\]/gu;
 const numbersRegex = /[0-9,.]/u;
 
-var __decorate$1x = function(decorators, target, key, desc) {
+var __decorate$1A = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12156,21 +12571,21 @@ let WuiInputAmount = class WuiInputAmount2 extends s$2 {
     }));
   }
 };
-WuiInputAmount.styles = [resetStyles, elementStyles, styles$10];
-__decorate$1x([
+WuiInputAmount.styles = [resetStyles, elementStyles, styles$13];
+__decorate$1A([
   n$6({ type: Boolean })
 ], WuiInputAmount.prototype, "disabled", void 0);
-__decorate$1x([
+__decorate$1A([
   n$6({ type: String })
 ], WuiInputAmount.prototype, "value", void 0);
-__decorate$1x([
+__decorate$1A([
   n$6({ type: String })
 ], WuiInputAmount.prototype, "placeholder", void 0);
-WuiInputAmount = __decorate$1x([
+WuiInputAmount = __decorate$1A([
   customElement("wui-input-amount")
 ], WuiInputAmount);
 
-const styles$$ = i$5`
+const styles$12 = i$5`
   :host {
     display: flex;
     gap: var(--wui-spacing-xs);
@@ -12193,7 +12608,7 @@ const styles$$ = i$5`
   }
 `;
 
-var __decorate$1w = function(decorators, target, key, desc) {
+var __decorate$1z = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12223,24 +12638,24 @@ let WuiPreviewItem = class WuiPreviewItem2 extends s$2 {
     return x$2`<wui-icon size="inherit" color="fg-200" name="networkPlaceholder"></wui-icon>`;
   }
 };
-WuiPreviewItem.styles = [resetStyles, elementStyles, styles$$];
-__decorate$1w([
+WuiPreviewItem.styles = [resetStyles, elementStyles, styles$12];
+__decorate$1z([
   n$6()
 ], WuiPreviewItem.prototype, "text", void 0);
-__decorate$1w([
+__decorate$1z([
   n$6()
 ], WuiPreviewItem.prototype, "address", void 0);
-__decorate$1w([
+__decorate$1z([
   n$6()
 ], WuiPreviewItem.prototype, "imageSrc", void 0);
-__decorate$1w([
+__decorate$1z([
   n$6({ type: Boolean })
 ], WuiPreviewItem.prototype, "isAddress", void 0);
-WuiPreviewItem = __decorate$1w([
+WuiPreviewItem = __decorate$1z([
   customElement("wui-preview-item")
 ], WuiPreviewItem);
 
-const styles$_ = i$5`
+const styles$11 = i$5`
   :host {
     position: relative;
   }
@@ -12279,7 +12694,7 @@ const styles$_ = i$5`
   }
 `;
 
-var __decorate$1v = function(decorators, target, key, desc) {
+var __decorate$1y = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12301,18 +12716,18 @@ let WuiIconButton = class WuiIconButton2 extends s$2 {
     </button>`;
   }
 };
-WuiIconButton.styles = [resetStyles, elementStyles, styles$_];
-__decorate$1v([
+WuiIconButton.styles = [resetStyles, elementStyles, styles$11];
+__decorate$1y([
   n$6()
 ], WuiIconButton.prototype, "text", void 0);
-__decorate$1v([
+__decorate$1y([
   n$6()
 ], WuiIconButton.prototype, "icon", void 0);
-WuiIconButton = __decorate$1v([
+WuiIconButton = __decorate$1y([
   customElement("wui-icon-button")
 ], WuiIconButton);
 
-const styles$Z = i$5`
+const styles$10 = i$5`
   button {
     column-gap: var(--wui-spacing-s);
     padding: 16.5px var(--wui-spacing-l) 16.5px var(--wui-spacing-xs);
@@ -12330,7 +12745,7 @@ const styles$Z = i$5`
   }
 `;
 
-var __decorate$1u = function(decorators, target, key, desc) {
+var __decorate$1x = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12354,18 +12769,18 @@ let WuiListButton = class WuiListButton2 extends s$2 {
     `;
   }
 };
-WuiListButton.styles = [resetStyles, elementStyles, styles$Z];
-__decorate$1u([
+WuiListButton.styles = [resetStyles, elementStyles, styles$10];
+__decorate$1x([
   n$6()
 ], WuiListButton.prototype, "text", void 0);
-__decorate$1u([
+__decorate$1x([
   n$6({ type: Boolean })
 ], WuiListButton.prototype, "disabled", void 0);
-WuiListButton = __decorate$1u([
+WuiListButton = __decorate$1x([
   customElement("wui-list-button")
 ], WuiListButton);
 
-const styles$Y = i$5`
+const styles$$ = i$5`
   button {
     column-gap: var(--wui-spacing-s);
     padding: 7px var(--wui-spacing-l) 7px var(--wui-spacing-xs);
@@ -12402,7 +12817,7 @@ const styles$Y = i$5`
   }
 `;
 
-var __decorate$1t = function(decorators, target, key, desc) {
+var __decorate$1w = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12442,24 +12857,24 @@ let WuiListSocial = class WuiListSocial2 extends s$2 {
     return null;
   }
 };
-WuiListSocial.styles = [resetStyles, elementStyles, styles$Y];
-__decorate$1t([
+WuiListSocial.styles = [resetStyles, elementStyles, styles$$];
+__decorate$1w([
   n$6()
 ], WuiListSocial.prototype, "logo", void 0);
-__decorate$1t([
+__decorate$1w([
   n$6()
 ], WuiListSocial.prototype, "name", void 0);
-__decorate$1t([
+__decorate$1w([
   n$6()
 ], WuiListSocial.prototype, "align", void 0);
-__decorate$1t([
+__decorate$1w([
   n$6({ type: Boolean })
 ], WuiListSocial.prototype, "disabled", void 0);
-WuiListSocial = __decorate$1t([
+WuiListSocial = __decorate$1w([
   customElement("wui-list-social")
 ], WuiListSocial);
 
-const styles$X = i$5`
+const styles$_ = i$5`
   :host {
     display: grid;
     width: inherit;
@@ -12467,7 +12882,7 @@ const styles$X = i$5`
   }
 `;
 
-var __decorate$1s = function(decorators, target, key, desc) {
+var __decorate$1v = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12501,45 +12916,45 @@ let WuiGrid = class WuiGrid2 extends s$2 {
     return x$2`<slot></slot>`;
   }
 };
-WuiGrid.styles = [resetStyles, styles$X];
-__decorate$1s([
+WuiGrid.styles = [resetStyles, styles$_];
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "gridTemplateRows", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "gridTemplateColumns", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "justifyItems", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "alignItems", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "justifyContent", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "alignContent", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "columnGap", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "rowGap", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "gap", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "padding", void 0);
-__decorate$1s([
+__decorate$1v([
   n$6()
 ], WuiGrid.prototype, "margin", void 0);
-WuiGrid = __decorate$1s([
+WuiGrid = __decorate$1v([
   customElement("wui-grid")
 ], WuiGrid);
 
-const styles$W = i$5`
+const styles$Z = i$5`
   :host {
     position: relative;
     display: flex;
@@ -12557,7 +12972,7 @@ const styles$W = i$5`
   }
 `;
 
-var __decorate$1r = function(decorators, target, key, desc) {
+var __decorate$1u = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12582,11 +12997,11 @@ let WuiSeparator = class WuiSeparator2 extends s$2 {
     return null;
   }
 };
-WuiSeparator.styles = [resetStyles, styles$W];
-__decorate$1r([
+WuiSeparator.styles = [resetStyles, styles$Z];
+__decorate$1u([
   n$6()
 ], WuiSeparator.prototype, "text", void 0);
-WuiSeparator = __decorate$1r([
+WuiSeparator = __decorate$1u([
   customElement("wui-separator")
 ], WuiSeparator);
 
@@ -12734,7 +13149,7 @@ const TransactionUtil = {
   }
 };
 
-var __decorate$1q = function(decorators, target, key, desc) {
+var __decorate$1t = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12810,51 +13225,51 @@ let W3mAccountButton = class W3mAccountButton2 extends s$2 {
     }
   }
 };
-__decorate$1q([
+__decorate$1t([
   n$6({ type: Boolean })
 ], W3mAccountButton.prototype, "disabled", void 0);
-__decorate$1q([
+__decorate$1t([
   n$6()
 ], W3mAccountButton.prototype, "balance", void 0);
-__decorate$1q([
+__decorate$1t([
   n$6()
 ], W3mAccountButton.prototype, "charsStart", void 0);
-__decorate$1q([
+__decorate$1t([
   n$6()
 ], W3mAccountButton.prototype, "charsEnd", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "address", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "balanceVal", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "balanceSymbol", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "profileName", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "profileImage", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "network", void 0);
-__decorate$1q([
+__decorate$1t([
   r$3()
 ], W3mAccountButton.prototype, "isUnsupportedChain", void 0);
-W3mAccountButton = __decorate$1q([
+W3mAccountButton = __decorate$1t([
   customElement("w3m-account-button")
 ], W3mAccountButton);
 
-const styles$V = i$5`
+const styles$Y = i$5`
   :host {
     display: block;
     width: max-content;
   }
 `;
 
-var __decorate$1p = function(decorators, target, key, desc) {
+var __decorate$1s = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12904,39 +13319,39 @@ let W3mButton = class W3mButton2 extends s$2 {
         `;
   }
 };
-W3mButton.styles = styles$V;
-__decorate$1p([
+W3mButton.styles = styles$Y;
+__decorate$1s([
   n$6({ type: Boolean })
 ], W3mButton.prototype, "disabled", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "balance", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "size", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "label", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "loadingLabel", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "charsStart", void 0);
-__decorate$1p([
+__decorate$1s([
   n$6()
 ], W3mButton.prototype, "charsEnd", void 0);
-__decorate$1p([
+__decorate$1s([
   r$3()
 ], W3mButton.prototype, "isAccount", void 0);
-__decorate$1p([
+__decorate$1s([
   r$3()
 ], W3mButton.prototype, "isLoading", void 0);
-W3mButton = __decorate$1p([
+W3mButton = __decorate$1s([
   customElement("w3m-button")
 ], W3mButton);
 
-var __decorate$1o = function(decorators, target, key, desc) {
+var __decorate$1r = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -12984,26 +13399,26 @@ let W3mConnectButton = class W3mConnectButton2 extends s$2 {
     }
   }
 };
-__decorate$1o([
+__decorate$1r([
   n$6()
 ], W3mConnectButton.prototype, "size", void 0);
-__decorate$1o([
+__decorate$1r([
   n$6()
 ], W3mConnectButton.prototype, "label", void 0);
-__decorate$1o([
+__decorate$1r([
   n$6()
 ], W3mConnectButton.prototype, "loadingLabel", void 0);
-__decorate$1o([
+__decorate$1r([
   r$3()
 ], W3mConnectButton.prototype, "open", void 0);
-__decorate$1o([
+__decorate$1r([
   r$3()
 ], W3mConnectButton.prototype, "loading", void 0);
-W3mConnectButton = __decorate$1o([
+W3mConnectButton = __decorate$1r([
   customElement("w3m-connect-button")
 ], W3mConnectButton);
 
-const styles$U = i$5`
+const styles$X = i$5`
   :host {
     z-index: var(--w3m-z-index);
     display: block;
@@ -13089,7 +13504,7 @@ const styles$U = i$5`
   }
 `;
 
-var __decorate$1n = function(decorators, target, key, desc) {
+var __decorate$1q = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -13109,9 +13524,13 @@ let W3mModal = class W3mModal2 extends s$2 {
     this.caipAddress = AccountController.state.caipAddress;
     this.isSiweEnabled = OptionsController.state.isSiweEnabled;
     this.connected = AccountController.state.isConnected;
+    this.loading = ModalController.state.loading;
     this.initializeTheming();
     ApiController.prefetch();
-    this.unsubscribe.push(ModalController.subscribeKey("open", (val) => val ? this.onOpen() : this.onClose()), AccountController.subscribeKey("isConnected", (val) => this.connected = val), AccountController.subscribeKey("caipAddress", (val) => this.onNewAddress(val)));
+    this.unsubscribe.push(ModalController.subscribeKey("open", (val) => val ? this.onOpen() : this.onClose()), ModalController.subscribeKey("loading", (val) => {
+      this.loading = val;
+      this.onNewAddress(AccountController.state.caipAddress);
+    }), AccountController.subscribeKey("isConnected", (val) => this.connected = val), AccountController.subscribeKey("caipAddress", (val) => this.onNewAddress(val)), OptionsController.subscribeKey("isSiweEnabled", (val) => this.isSiweEnabled = val));
     EventsController.sendEvent({ type: "track", event: "MODAL_LOADED" });
   }
   disconnectedCallback() {
@@ -13203,7 +13622,7 @@ let W3mModal = class W3mModal2 extends s$2 {
     this.abortController = void 0;
   }
   async onNewAddress(caipAddress) {
-    if (!this.connected) {
+    if (!this.connected || this.loading) {
       return;
     }
     const hasNetworkChanged = this.caipAddress && this.caipAddress !== caipAddress;
@@ -13229,20 +13648,23 @@ let W3mModal = class W3mModal2 extends s$2 {
     }
   }
 };
-W3mModal.styles = styles$U;
-__decorate$1n([
+W3mModal.styles = styles$X;
+__decorate$1q([
   r$3()
 ], W3mModal.prototype, "open", void 0);
-__decorate$1n([
+__decorate$1q([
   r$3()
 ], W3mModal.prototype, "caipAddress", void 0);
-__decorate$1n([
+__decorate$1q([
   r$3()
 ], W3mModal.prototype, "isSiweEnabled", void 0);
-__decorate$1n([
+__decorate$1q([
   r$3()
 ], W3mModal.prototype, "connected", void 0);
-W3mModal = __decorate$1n([
+__decorate$1q([
+  r$3()
+], W3mModal.prototype, "loading", void 0);
+W3mModal = __decorate$1q([
   customElement("w3m-modal")
 ], W3mModal);
 
@@ -13251,14 +13673,14 @@ const index = {
     get W3mModal () { return W3mModal; }
 };
 
-const styles$T = i$5`
+const styles$W = i$5`
   :host {
     display: block;
     width: max-content;
   }
 `;
 
-var __decorate$1m = function(decorators, target, key, desc) {
+var __decorate$1p = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -13306,34 +13728,34 @@ let W3mNetworkButton = class W3mNetworkButton2 extends s$2 {
     }
   }
 };
-W3mNetworkButton.styles = styles$T;
-__decorate$1m([
+W3mNetworkButton.styles = styles$W;
+__decorate$1p([
   n$6({ type: Boolean })
 ], W3mNetworkButton.prototype, "disabled", void 0);
-__decorate$1m([
+__decorate$1p([
   r$3()
 ], W3mNetworkButton.prototype, "network", void 0);
-__decorate$1m([
+__decorate$1p([
   r$3()
 ], W3mNetworkButton.prototype, "connected", void 0);
-__decorate$1m([
+__decorate$1p([
   r$3()
 ], W3mNetworkButton.prototype, "loading", void 0);
-__decorate$1m([
+__decorate$1p([
   r$3()
 ], W3mNetworkButton.prototype, "isUnsupportedChain", void 0);
-W3mNetworkButton = __decorate$1m([
+W3mNetworkButton = __decorate$1p([
   customElement("w3m-network-button")
 ], W3mNetworkButton);
 
-const styles$S = i$5`
+const styles$V = i$5`
   :host {
     display: block;
     will-change: transform, opacity;
   }
 `;
 
-var __decorate$1l = function(decorators, target, key, desc) {
+var __decorate$1o = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -13377,6 +13799,18 @@ let W3mRouter = class W3mRouter2 extends s$2 {
   }
   viewTemplate() {
     switch (this.view) {
+      case "Account":
+        return x$2`<w3m-account-view></w3m-account-view>`;
+      case "AccountSettings":
+        return x$2`<w3m-account-settings-view></w3m-account-settings-view>`;
+      case "AllWallets":
+        return x$2`<w3m-all-wallets-view></w3m-all-wallets-view>`;
+      case "ApproveTransaction":
+        return x$2`<w3m-approve-transaction-view></w3m-approve-transaction-view>`;
+      case "BuyInProgress":
+        return x$2`<w3m-buy-in-progress-view></w3m-buy-in-progress-view>`;
+      case "ChooseAccountName":
+        return x$2`<w3m-choose-account-name-view></w3m-choose-account-name-view>`;
       case "Connect":
         return x$2`<w3m-connect-view></w3m-connect-view>`;
       case "ConnectingWalletConnect":
@@ -13385,32 +13819,38 @@ let W3mRouter = class W3mRouter2 extends s$2 {
         return x$2`<w3m-connecting-external-view></w3m-connecting-external-view>`;
       case "ConnectingSiwe":
         return x$2`<w3m-connecting-siwe-view></w3m-connecting-siwe-view>`;
-      case "AllWallets":
-        return x$2`<w3m-all-wallets-view></w3m-all-wallets-view>`;
-      case "Networks":
-        return x$2`<w3m-networks-view></w3m-networks-view>`;
-      case "SwitchNetwork":
-        return x$2`<w3m-network-switch-view></w3m-network-switch-view>`;
-      case "Account":
-        return x$2`<w3m-account-view></w3m-account-view>`;
-      case "AccountSettings":
-        return x$2`<w3m-account-settings-view></w3m-account-settings-view>`;
-      case "WhatIsAWallet":
-        return x$2`<w3m-what-is-a-wallet-view></w3m-what-is-a-wallet-view>`;
-      case "WhatIsANetwork":
-        return x$2`<w3m-what-is-a-network-view></w3m-what-is-a-network-view>`;
-      case "GetWallet":
-        return x$2`<w3m-get-wallet-view></w3m-get-wallet-view>`;
+      case "ConnectWallets":
+        return x$2`<w3m-connect-wallets-view></w3m-connect-wallets-view>`;
+      case "ConnectSocials":
+        return x$2`<w3m-connect-socials-view></w3m-connect-socials-view>`;
+      case "ConnectingSocial":
+        return x$2`<w3m-connecting-social-view></w3m-connecting-social-view>`;
       case "Downloads":
         return x$2`<w3m-downloads-view></w3m-downloads-view>`;
       case "EmailVerifyOtp":
         return x$2`<w3m-email-verify-otp-view></w3m-email-verify-otp-view>`;
       case "EmailVerifyDevice":
         return x$2`<w3m-email-verify-device-view></w3m-email-verify-device-view>`;
-      case "ApproveTransaction":
-        return x$2`<w3m-approve-transaction-view></w3m-approve-transaction-view>`;
+      case "Networks":
+        return x$2`<w3m-networks-view></w3m-networks-view>`;
+      case "RegisterAccountName":
+        return x$2`<w3m-register-account-name-view></w3m-register-account-name-view>`;
+      case "RegisterAccountNameSuccess":
+        return x$2`<w3m-register-account-name-success-view></w3m-register-account-name-success-view>`;
+      case "SwitchNetwork":
+        return x$2`<w3m-network-switch-view></w3m-network-switch-view>`;
+      case "GetWallet":
+        return x$2`<w3m-get-wallet-view></w3m-get-wallet-view>`;
       case "Transactions":
         return x$2`<w3m-transactions-view></w3m-transactions-view>`;
+      case "OnRampProviders":
+        return x$2`<w3m-onramp-providers-view></w3m-onramp-providers-view>`;
+      case "OnRampActivity":
+        return x$2`<w3m-onramp-activity-view></w3m-onramp-activity-view>`;
+      case "OnRampTokenSelect":
+        return x$2`<w3m-onramp-token-select-view></w3m-onramp-token-select-view>`;
+      case "OnRampFiatSelect":
+        return x$2`<w3m-onramp-fiat-select-view></w3m-onramp-fiat-select-view>`;
       case "UpgradeEmailWallet":
         return x$2`<w3m-upgrade-wallet-view></w3m-upgrade-wallet-view>`;
       case "UpgradeToSmartAccount":
@@ -13423,18 +13863,6 @@ let W3mRouter = class W3mRouter2 extends s$2 {
         return x$2`<w3m-update-email-secondary-otp-view></w3m-update-email-secondary-otp-view>`;
       case "UnsupportedChain":
         return x$2`<w3m-unsupported-chain-view></w3m-unsupported-chain-view>`;
-      case "OnRampProviders":
-        return x$2`<w3m-onramp-providers-view></w3m-onramp-providers-view>`;
-      case "OnRampActivity":
-        return x$2`<w3m-onramp-activity-view></w3m-onramp-activity-view>`;
-      case "OnRampTokenSelect":
-        return x$2`<w3m-onramp-token-select-view></w3m-onramp-token-select-view>`;
-      case "OnRampFiatSelect":
-        return x$2`<w3m-onramp-fiat-select-view></w3m-onramp-fiat-select-view>`;
-      case "WhatIsABuy":
-        return x$2`<w3m-what-is-a-buy-view></w3m-what-is-a-buy-view>`;
-      case "BuyInProgress":
-        return x$2`<w3m-buy-in-progress-view></w3m-buy-in-progress-view>`;
       case "WalletReceive":
         return x$2`<w3m-wallet-receive-view></w3m-wallet-receive-view>`;
       case "WalletCompatibleNetworks":
@@ -13451,12 +13879,12 @@ let W3mRouter = class W3mRouter2 extends s$2 {
         return x$2`<w3m-wallet-send-select-token-view></w3m-wallet-send-select-token-view>`;
       case "WalletSendPreview":
         return x$2`<w3m-wallet-send-preview-view></w3m-wallet-send-preview-view>`;
-      case "ConnectWallets":
-        return x$2`<w3m-connect-wallets-view></w3m-connect-wallets-view>`;
-      case "ConnectSocials":
-        return x$2`<w3m-connect-socials-view></w3m-connect-socials-view>`;
-      case "ConnectingSocial":
-        return x$2`<w3m-connecting-social-view></w3m-connecting-social-view>`;
+      case "WhatIsABuy":
+        return x$2`<w3m-what-is-a-buy-view></w3m-what-is-a-buy-view>`;
+      case "WhatIsANetwork":
+        return x$2`<w3m-what-is-a-network-view></w3m-what-is-a-network-view>`;
+      case "WhatIsAWallet":
+        return x$2`<w3m-what-is-a-wallet-view></w3m-what-is-a-wallet-view>`;
       default:
         return x$2`<w3m-connect-view></w3m-connect-view>`;
     }
@@ -13485,15 +13913,15 @@ let W3mRouter = class W3mRouter2 extends s$2 {
     return this.shadowRoot?.querySelector("div");
   }
 };
-W3mRouter.styles = styles$S;
-__decorate$1l([
+W3mRouter.styles = styles$V;
+__decorate$1o([
   r$3()
 ], W3mRouter.prototype, "view", void 0);
-W3mRouter = __decorate$1l([
+W3mRouter = __decorate$1o([
   customElement("w3m-router")
 ], W3mRouter);
 
-const styles$R = i$5`
+const styles$U = i$5`
   :host > wui-flex {
     width: 100%;
     max-width: 360px;
@@ -13509,7 +13937,7 @@ const styles$R = i$5`
   }
 `;
 
-var __decorate$1k = function(decorators, target, key, desc) {
+var __decorate$1n = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -13619,33 +14047,33 @@ let W3mOnrampWidget = class W3mOnrampWidget2 extends s$2 {
     await OnRampController.getQuote();
   }
 };
-W3mOnrampWidget.styles = styles$R;
-__decorate$1k([
+W3mOnrampWidget.styles = styles$U;
+__decorate$1n([
   n$6({ type: Boolean })
 ], W3mOnrampWidget.prototype, "disabled", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "connected", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "loading", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "paymentCurrency", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "paymentAmount", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "purchaseAmount", void 0);
-__decorate$1k([
+__decorate$1n([
   r$3()
 ], W3mOnrampWidget.prototype, "quoteLoading", void 0);
-W3mOnrampWidget = __decorate$1k([
+W3mOnrampWidget = __decorate$1n([
   customElement("w3m-onramp-widget")
 ], W3mOnrampWidget);
 
-const styles$Q = i$5`
+const styles$T = i$5`
   wui-flex {
     width: 100%;
   }
@@ -13874,7 +14302,7 @@ const AppUpdateEmailSecondaryOtpRequest = z$4.object({ otp: z$4.string() });
 const AppSyncThemeRequest = z$4.object({
   themeMode: z$4.optional(z$4.enum(["light", "dark"])),
   themeVariables: z$4.optional(z$4.record(z$4.string(), z$4.string().or(z$4.number()))),
-  w3mThemeVariables: z$4.record(z$4.string(), z$4.string())
+  w3mThemeVariables: z$4.optional(z$4.record(z$4.string(), z$4.string()))
 });
 const AppSyncDappDataRequest = z$4.object({
   metadata: z$4.object({
@@ -14776,7 +15204,7 @@ class W3mFrameProvider {
   }
 }
 
-var __decorate$1j = function(decorators, target, key, desc) {
+var __decorate$1m = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -14810,12 +15238,13 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
         } else {
           ModalController.close();
         }
+      }),
+      NetworkController.subscribeKey("caipNetwork", (val) => {
+        if (val?.id) {
+          this.network = val;
+        }
       })
-    ], NetworkController.subscribeKey("caipNetwork", (val) => {
-      if (val?.id) {
-        this.network = val;
-      }
-    }));
+    ]);
   }
   disconnectedCallback() {
     this.usubscribe.forEach((unsubscribe) => unsubscribe());
@@ -14835,17 +15264,12 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
         <wui-avatar
           alt=${this.address}
           address=${this.address}
-          imageSrc=${o$3(this.profileImage)}
+          .imageSrc=${this.profileImage || ""}
         ></wui-avatar>
         <wui-flex flexDirection="column" alignItems="center">
           <wui-flex gap="3xs" alignItems="center" justifyContent="center">
             <wui-text variant="large-600" color="fg-100" data-testid="account-settings-address">
-              ${this.profileName ? UiHelperUtil.getTruncateString({
-      string: this.profileName,
-      charsStart: 20,
-      charsEnd: 0,
-      truncate: "end"
-    }) : UiHelperUtil.getTruncateString({
+              ${UiHelperUtil.getTruncateString({
       string: this.address,
       charsStart: 4,
       charsEnd: 6,
@@ -14878,7 +15302,7 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
               ${this.network?.name ?? "Unknown"}
             </wui-text>
           </wui-list-item>
-          ${this.togglePreferredAccountBtnTemplate()}
+          ${this.togglePreferredAccountBtnTemplate()} ${this.chooseNameButtonTemplate()}
           <wui-list-item
             variant="icon"
             iconVariant="overlay"
@@ -14892,6 +15316,27 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
           </wui-list-item>
         </wui-flex>
       </wui-flex>
+    `;
+  }
+  chooseNameButtonTemplate() {
+    const type = StorageUtil.getConnectedConnector();
+    const authConnector = ConnectorController.getAuthConnector();
+    const isAllowed = EnsController.isAllowedToRegisterName();
+    if (!authConnector || type !== "AUTH" || this.profileName || !isAllowed) {
+      return null;
+    }
+    return x$2`
+      <wui-list-item
+        variant="icon"
+        iconVariant="overlay"
+        icon="id"
+        iconSize="sm"
+        ?chevron=${true}
+        @click=${this.onChooseName.bind(this)}
+        data-testid="account-choose-name-button"
+      >
+        <wui-text variant="paragraph-500" color="fg-100">Choose account name </wui-text>
+      </wui-list-item>
     `;
   }
   isAllowedNetworkSwitch() {
@@ -14955,6 +15400,9 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
       </wui-list-item>
     `;
   }
+  onChooseName() {
+    RouterController.push("ChooseAccountName");
+  }
   async changePreferredAccountType() {
     const smartAccountEnabled = NetworkController.checkIfSmartAccountEnabled();
     const accountTypeTarget = this.preferredAccountType === W3mFrameRpcConstants.ACCOUNT_TYPES.SMART_ACCOUNT || !smartAccountEnabled ? W3mFrameRpcConstants.ACCOUNT_TYPES.EOA : W3mFrameRpcConstants.ACCOUNT_TYPES.SMART_ACCOUNT;
@@ -14963,8 +15411,10 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
       return;
     }
     this.loading = true;
+    ModalController.setLoading(true);
     await authConnector?.provider.setPreferredAccount(accountTypeTarget);
     await ConnectionController.reconnectExternal(authConnector);
+    ModalController.setLoading(false);
     this.text = accountTypeTarget === W3mFrameRpcConstants.ACCOUNT_TYPES.SMART_ACCOUNT ? "Switch to your EOA" : "Switch to your smart account";
     this.switched = true;
     SendController.resetSend();
@@ -14993,39 +15443,39 @@ let W3mAccountSettingsView = class W3mAccountSettingsView2 extends s$2 {
     }
   }
 };
-W3mAccountSettingsView.styles = styles$Q;
-__decorate$1j([
+W3mAccountSettingsView.styles = styles$T;
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "address", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "profileImage", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "profileName", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "network", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "preferredAccountType", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "disconnecting", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "loading", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "switched", void 0);
-__decorate$1j([
+__decorate$1m([
   r$3()
 ], W3mAccountSettingsView.prototype, "text", void 0);
-W3mAccountSettingsView = __decorate$1j([
+W3mAccountSettingsView = __decorate$1m([
   customElement("w3m-account-settings-view")
 ], W3mAccountSettingsView);
 
-var __decorate$1i = function(decorators, target, key, desc) {
+var __decorate$1l = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15049,11 +15499,11 @@ let W3mAccountView = class W3mAccountView2 extends s$2 {
     return x$2`<w3m-account-default-widget></w3m-account-default-widget>`;
   }
 };
-W3mAccountView = __decorate$1i([
+W3mAccountView = __decorate$1l([
   customElement("w3m-account-view")
 ], W3mAccountView);
 
-var __decorate$1h = function(decorators, target, key, desc) {
+var __decorate$1k = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15106,14 +15556,14 @@ let W3mAllWalletsView = class W3mAllWalletsView2 extends s$2 {
     RouterController.push("ConnectingWalletConnect");
   }
 };
-__decorate$1h([
+__decorate$1k([
   r$3()
 ], W3mAllWalletsView.prototype, "search", void 0);
-W3mAllWalletsView = __decorate$1h([
+W3mAllWalletsView = __decorate$1k([
   customElement("w3m-all-wallets-view")
 ], W3mAllWalletsView);
 
-const styles$P = i$5`
+const styles$S = i$5`
   @keyframes shake {
     0% {
       transform: translateX(0);
@@ -15199,7 +15649,7 @@ const styles$P = i$5`
   }
 `;
 
-var __decorate$1g = function(decorators, target, key, desc) {
+var __decorate$1j = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15364,42 +15814,42 @@ let W3mBuyInProgressView = class W3mBuyInProgressView2 extends s$2 {
     }
   }
 };
-W3mBuyInProgressView.styles = styles$P;
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "selectedOnRampProvider", void 0);
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "uri", void 0);
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "ready", void 0);
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "showRetry", void 0);
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "buffering", void 0);
-__decorate$1g([
-  r$3()
-], W3mBuyInProgressView.prototype, "error", void 0);
-__decorate$1g([
+W3mBuyInProgressView.styles = styles$S;
+__decorate$1j([
   r$3()
 ], W3mBuyInProgressView.prototype, "intervalId", void 0);
-__decorate$1g([
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "selectedOnRampProvider", void 0);
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "uri", void 0);
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "ready", void 0);
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "showRetry", void 0);
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "buffering", void 0);
+__decorate$1j([
+  r$3()
+], W3mBuyInProgressView.prototype, "error", void 0);
+__decorate$1j([
   r$3()
 ], W3mBuyInProgressView.prototype, "startTime", void 0);
-__decorate$1g([
+__decorate$1j([
   n$6({ type: Boolean })
 ], W3mBuyInProgressView.prototype, "isMobile", void 0);
-__decorate$1g([
+__decorate$1j([
   n$6()
 ], W3mBuyInProgressView.prototype, "onRetry", void 0);
-W3mBuyInProgressView = __decorate$1g([
+W3mBuyInProgressView = __decorate$1j([
   customElement("w3m-buy-in-progress-view")
 ], W3mBuyInProgressView);
 
-const styles$O = i$5`
+const styles$R = i$5`
   :host > wui-flex {
     max-height: clamp(360px, 540px, 80vh);
     scrollbar-width: none;
@@ -15416,7 +15866,7 @@ const styles$O = i$5`
   }
 `;
 
-var __decorate$1f = function(decorators, target, key, desc) {
+var __decorate$1i = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15457,7 +15907,7 @@ let W3mConnectView = class W3mConnectView2 extends s$2 {
             <w3m-connect-announced-widget></w3m-connect-announced-widget>
             <w3m-connect-injected-widget></w3m-connect-injected-widget>
             <w3m-connect-custom-widget></w3m-connect-custom-widget>
-            <w3m-connect-recommended-widget></w3m-connect-recommended-widget>
+            //<w3m-connect-recommended-widget></w3m-connect-recommended-widget>
             <wui-flex class="all-wallets" .margin=${["xs", "0", "0", "0"]}>
               <w3m-all-wallets-widget></w3m-all-wallets-widget>
             </wui-flex>
@@ -15475,15 +15925,15 @@ let W3mConnectView = class W3mConnectView2 extends s$2 {
     RouterController.push("ConnectWallets");
   }
 };
-W3mConnectView.styles = styles$O;
-__decorate$1f([
+W3mConnectView.styles = styles$R;
+__decorate$1i([
   r$3()
 ], W3mConnectView.prototype, "connectors", void 0);
-W3mConnectView = __decorate$1f([
+W3mConnectView = __decorate$1i([
   customElement("w3m-connect-view")
 ], W3mConnectView);
 
-const styles$N = i$5`
+const styles$Q = i$5`
   @keyframes shake {
     0% {
       transform: translateX(0);
@@ -15546,7 +15996,7 @@ const styles$N = i$5`
   }
 `;
 
-var __decorate$1e = function(decorators, target, key, desc) {
+var __decorate$1h = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15703,30 +16153,30 @@ class W3mConnectingWidget extends s$2 {
     }
   }
 }
-W3mConnectingWidget.styles = styles$N;
-__decorate$1e([
+W3mConnectingWidget.styles = styles$Q;
+__decorate$1h([
   r$3()
 ], W3mConnectingWidget.prototype, "uri", void 0);
-__decorate$1e([
+__decorate$1h([
   r$3()
 ], W3mConnectingWidget.prototype, "error", void 0);
-__decorate$1e([
+__decorate$1h([
   r$3()
 ], W3mConnectingWidget.prototype, "ready", void 0);
-__decorate$1e([
+__decorate$1h([
   r$3()
 ], W3mConnectingWidget.prototype, "showRetry", void 0);
-__decorate$1e([
+__decorate$1h([
   r$3()
 ], W3mConnectingWidget.prototype, "buffering", void 0);
-__decorate$1e([
+__decorate$1h([
   n$6({ type: Boolean })
 ], W3mConnectingWidget.prototype, "isMobile", void 0);
-__decorate$1e([
+__decorate$1h([
   n$6()
 ], W3mConnectingWidget.prototype, "onRetry", void 0);
 
-var __decorate$1d = function(decorators, target, key, desc) {
+var __decorate$1g = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15783,11 +16233,11 @@ let W3mConnectingExternalView = class W3mConnectingExternalView2 extends W3mConn
     }
   }
 };
-W3mConnectingExternalView = __decorate$1d([
+W3mConnectingExternalView = __decorate$1g([
   customElement("w3m-connecting-external-view")
 ], W3mConnectingExternalView);
 
-var __decorate$1c = function(decorators, target, key, desc) {
+var __decorate$1f = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -15806,7 +16256,7 @@ let W3mConnectingWcView = class W3mConnectingWcView2 extends s$2 {
     this.platform = void 0;
     this.platforms = [];
     this.initializeConnection();
-    this.interval = setInterval(this.initializeConnection.bind(this), ConstantsUtil$2.TEN_SEC_MS);
+    this.interval = setInterval(this.initializeConnection.bind(this), ConstantsUtil$3.TEN_SEC_MS);
   }
   disconnectedCallback() {
     clearTimeout(this.interval);
@@ -15971,17 +16421,110 @@ let W3mConnectingWcView = class W3mConnectingWcView2 extends s$2 {
     }
   }
 };
-__decorate$1c([
+__decorate$1f([
   r$3()
 ], W3mConnectingWcView.prototype, "platform", void 0);
-__decorate$1c([
+__decorate$1f([
   r$3()
 ], W3mConnectingWcView.prototype, "platforms", void 0);
-W3mConnectingWcView = __decorate$1c([
+W3mConnectingWcView = __decorate$1f([
   customElement("w3m-connecting-wc-view")
 ], W3mConnectingWcView);
 
-var __decorate$1b = function(decorators, target, key, desc) {
+const styles$P = i$5`
+  .continue-button-container {
+    width: 100%;
+  }
+`;
+
+var __decorate$1e = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let W3mChooseAccountNameView = class W3mChooseAccountNameView2 extends s$2 {
+  constructor() {
+    super(...arguments);
+    this.loading = false;
+  }
+  render() {
+    return x$2`
+      <wui-flex
+        flexDirection="column"
+        alignItems="center"
+        gap="xxl"
+        .padding=${["0", "0", "l", "0"]}
+      >
+        ${this.onboardingTemplate()} ${this.buttonsTemplate()}
+        <wui-link
+          @click=${() => {
+      CoreHelperUtil.openHref(NavigationUtil.URLS.FAQ, "_blank");
+    }}
+        >
+          Learn more about names
+          <wui-icon color="inherit" slot="iconRight" name="externalLink"></wui-icon>
+        </wui-link>
+      </wui-flex>
+    `;
+  }
+  onboardingTemplate() {
+    return x$2` <wui-flex
+      flexDirection="column"
+      gap="xxl"
+      alignItems="center"
+      .padding=${["0", "xxl", "0", "xxl"]}
+    >
+      <wui-flex gap="s" alignItems="center" justifyContent="center">
+        <wui-icon-box
+          icon="id"
+          size="xl"
+          iconSize="xxl"
+          iconColor="fg-200"
+          backgroundColor="fg-200"
+        ></wui-icon-box>
+      </wui-flex>
+      <wui-flex flexDirection="column" alignItems="center" gap="s">
+        <wui-text align="center" variant="medium-600" color="fg-100">
+          Choose your account name
+        </wui-text>
+        <wui-text align="center" variant="paragraph-400" color="fg-100">
+          Finally say goodbye to 0x addresses, name your account to make it easier to exchange
+          assets
+        </wui-text>
+      </wui-flex>
+    </wui-flex>`;
+  }
+  buttonsTemplate() {
+    return x$2`<wui-flex
+      .padding=${["0", "2l", "0", "2l"]}
+      gap="s"
+      class="continue-button-container"
+    >
+      <wui-button
+        fullWidth
+        .loading=${this.loading}
+        size="lg"
+        borderRadius="xs"
+        @click=${() => RouterController.push("RegisterAccountName")}
+        >Choose name
+      </wui-button>
+    </wui-flex>`;
+  }
+};
+W3mChooseAccountNameView.styles = styles$P;
+__decorate$1e([
+  r$3()
+], W3mChooseAccountNameView.prototype, "loading", void 0);
+W3mChooseAccountNameView = __decorate$1e([
+  customElement("w3m-choose-account-name-view")
+], W3mChooseAccountNameView);
+
+var __decorate$1d = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -16086,11 +16629,11 @@ let W3mDownloadsView = class W3mDownloadsView2 extends s$2 {
     }
   }
 };
-W3mDownloadsView = __decorate$1b([
+W3mDownloadsView = __decorate$1d([
   customElement("w3m-downloads-view")
 ], W3mDownloadsView);
 
-var __decorate$1a = function(decorators, target, key, desc) {
+var __decorate$1c = function(decorators, target, key, desc) {
   var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
   if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
     r = Reflect.decorate(decorators, target, key, desc);
@@ -16134,9 +16677,297 @@ let W3mGetWalletView = class W3mGetWalletView2 extends s$2 {
       `);
   }
 };
-W3mGetWalletView = __decorate$1a([
+W3mGetWalletView = __decorate$1c([
   customElement("w3m-get-wallet-view")
 ], W3mGetWalletView);
+
+const styles$O = i$5`
+  wui-flex {
+    width: 100%;
+  }
+
+  .suggestion {
+    background: var(--wui-gray-glass-002);
+    border-radius: var(--wui-border-radius-xs);
+  }
+
+  .suggestion:hover {
+    background-color: var(--wui-gray-glass-005);
+    cursor: pointer;
+  }
+
+  .suggested-name {
+    max-width: 75%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  form {
+    width: 100%;
+  }
+
+  wui-icon-link {
+    position: absolute;
+    right: 20px;
+    transform: translateY(11px);
+  }
+`;
+
+var __decorate$1b = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let W3mRegisterAccountNameView = class W3mRegisterAccountNameView2 extends s$2 {
+  constructor() {
+    super();
+    this.formRef = e$1();
+    this.usubscribe = [];
+    this.name = "";
+    this.error = "";
+    this.loading = EnsController.state.loading;
+    this.suggestions = EnsController.state.suggestions;
+    this.registered = false;
+    this.onDebouncedNameInputChange = CoreHelperUtil.debounce((value) => {
+      if (EnsController.validateName(value)) {
+        this.error = "";
+        this.name = value;
+        EnsController.getSuggestions(value);
+        EnsController.isNameRegistered(value).then((registered) => {
+          this.registered = registered;
+        });
+      } else if (value.length < 4) {
+        this.error = "Name must be at least 4 characters long";
+      } else {
+        this.error = "Can only contain letters, numbers and - characters";
+      }
+    });
+    this.usubscribe.push(...[
+      EnsController.subscribe((val) => {
+        this.suggestions = val.suggestions;
+        this.loading = val.loading;
+      })
+    ]);
+  }
+  firstUpdated() {
+    this.formRef.value?.addEventListener("keydown", this.onEnterKey.bind(this));
+  }
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.usubscribe.forEach((unsub) => unsub());
+    this.formRef.value?.removeEventListener("keydown", this.onEnterKey.bind(this));
+  }
+  render() {
+    return x$2`
+      <wui-flex
+        flexDirection="column"
+        alignItems="center"
+        gap="m"
+        .padding=${["0", "s", "m", "s"]}
+      >
+        <form ${n$4(this.formRef)} @submit=${this.onSubmitName.bind(this)}>
+          <wui-ens-input
+            @inputChange=${this.onNameInputChange.bind(this)}
+            .errorMessage=${this.error}
+            .value=${this.name}
+          >
+          </wui-ens-input>
+          ${this.submitButtonTemplate()}
+          <input type="submit" hidden />
+        </form>
+        ${this.templateSuggestions()}
+      </wui-flex>
+    `;
+  }
+  submitButtonTemplate() {
+    const showSubmit = this.isAllowedToSubmit();
+    return showSubmit ? x$2`
+          <wui-icon-link
+            size="sm"
+            icon="chevronRight"
+            iconcolor="accent-100"
+            @click=${this.onSubmitName.bind(this)}
+          >
+          </wui-icon-link>
+        ` : null;
+  }
+  onSelectSuggestion(name) {
+    return () => {
+      this.name = name;
+      this.registered = false;
+      this.requestUpdate();
+    };
+  }
+  onNameInputChange(event) {
+    this.onDebouncedNameInputChange(event.detail);
+  }
+  nameSuggestionTagTemplate() {
+    if (this.loading) {
+      return x$2`<wui-loading-spinner size="lg" color="fg-100"></wui-loading-spinner>`;
+    }
+    return this.registered ? x$2`<wui-tag variant="shade" size="lg">Registered</wui-tag>` : x$2`<wui-tag variant="success" size="lg">Available</wui-tag>`;
+  }
+  templateSuggestions() {
+    if (!this.name || this.name.length < 4 || this.error) {
+      return null;
+    }
+    const suggestions = this.registered ? this.suggestions.filter((s) => s.name !== this.name) : [];
+    return x$2`<wui-flex flexDirection="column" gap="xxs" alignItems="center">
+      <wui-flex
+        .padding=${["m", "m", "m", "m"]}
+        justifyContent="space-between"
+        class="suggestion"
+      >
+        <wui-text color="fg-100" variant="paragraph-400" class="suggested-name">
+          ${this.name}</wui-text
+        >${this.nameSuggestionTagTemplate()}
+      </wui-flex>
+      ${suggestions.map((suggestion) => this.availableNameTemplate(suggestion.name))}
+    </wui-flex>`;
+  }
+  availableNameTemplate(suggestion) {
+    return x$2` <wui-flex
+      .padding=${["m", "m", "m", "m"]}
+      justifyContent="space-between"
+      class="suggestion"
+      @click=${this.onSelectSuggestion(suggestion)}
+    >
+      <wui-text color="fg-100" variant="paragraph-400" class="suggested-name">
+        ${suggestion}
+      </wui-text>
+      <wui-tag variant="success" size="lg">Available</wui-tag>
+    </wui-flex>`;
+  }
+  isAllowedToSubmit() {
+    return !this.loading && !this.registered && !this.error && EnsController.validateName(this.name);
+  }
+  async onSubmitName() {
+    try {
+      if (!this.isAllowedToSubmit()) {
+        return;
+      }
+      await EnsController.registerName(this.name);
+    } catch (error) {
+      SnackController.showError(error.message);
+    }
+  }
+  onEnterKey(event) {
+    if (event.key === "Enter" && this.isAllowedToSubmit()) {
+      this.onSubmitName();
+    }
+  }
+};
+W3mRegisterAccountNameView.styles = styles$O;
+__decorate$1b([
+  n$6()
+], W3mRegisterAccountNameView.prototype, "errorMessage", void 0);
+__decorate$1b([
+  r$3()
+], W3mRegisterAccountNameView.prototype, "name", void 0);
+__decorate$1b([
+  r$3()
+], W3mRegisterAccountNameView.prototype, "error", void 0);
+__decorate$1b([
+  r$3()
+], W3mRegisterAccountNameView.prototype, "loading", void 0);
+__decorate$1b([
+  r$3()
+], W3mRegisterAccountNameView.prototype, "suggestions", void 0);
+__decorate$1b([
+  r$3()
+], W3mRegisterAccountNameView.prototype, "registered", void 0);
+W3mRegisterAccountNameView = __decorate$1b([
+  customElement("w3m-register-account-name-view")
+], W3mRegisterAccountNameView);
+
+const styles$N = i$5`
+  .continue-button-container {
+    width: 100%;
+  }
+`;
+
+var __decorate$1a = function(decorators, target, key, desc) {
+  var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+  if (typeof Reflect === "object" && typeof Reflect.decorate === "function")
+    r = Reflect.decorate(decorators, target, key, desc);
+  else
+    for (var i = decorators.length - 1; i >= 0; i--)
+      if (d = decorators[i])
+        r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+  return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+let W3mRegisterAccountNameSuccess = class W3mRegisterAccountNameSuccess2 extends s$2 {
+  render() {
+    return x$2`
+      <wui-flex
+        flexDirection="column"
+        alignItems="center"
+        gap="xxl"
+        .padding=${["0", "0", "l", "0"]}
+      >
+        ${this.onboardingTemplate()} ${this.buttonsTemplate()}
+        <wui-link
+          @click=${() => {
+      CoreHelperUtil.openHref(NavigationUtil.URLS.FAQ, "_blank");
+    }}
+        >
+          Learn more
+          <wui-icon color="inherit" slot="iconRight" name="externalLink"></wui-icon>
+        </wui-link>
+      </wui-flex>
+    `;
+  }
+  onboardingTemplate() {
+    return x$2` <wui-flex
+      flexDirection="column"
+      gap="xxl"
+      alignItems="center"
+      .padding=${["0", "xxl", "0", "xxl"]}
+    >
+      <wui-flex gap="s" alignItems="center" justifyContent="center">
+        <wui-icon-box
+          size="xl"
+          iconcolor="success-100"
+          backgroundcolor="success-100"
+          icon="checkmark"
+          background="opaque"
+        ></wui-icon-box>
+      </wui-flex>
+      <wui-flex flexDirection="column" alignItems="center" gap="s">
+        <wui-text align="center" variant="medium-600" color="fg-100">
+          Account name chosen successfully
+        </wui-text>
+        <wui-text align="center" variant="paragraph-400" color="fg-100">
+          You can now fund your account and trade crypto
+        </wui-text>
+      </wui-flex>
+    </wui-flex>`;
+  }
+  buttonsTemplate() {
+    return x$2`<wui-flex
+      .padding=${["0", "2l", "0", "2l"]}
+      gap="s"
+      class="continue-button-container"
+    >
+      <wui-button fullWidth size="lg" borderRadius="xs" @click=${this.redirectToAccount.bind(this)}
+        >Let's Go!
+      </wui-button>
+    </wui-flex>`;
+  }
+  redirectToAccount() {
+    RouterController.replace("Account");
+  }
+};
+W3mRegisterAccountNameSuccess.styles = styles$N;
+W3mRegisterAccountNameSuccess = __decorate$1a([
+  customElement("w3m-register-account-name-success-view")
+], W3mRegisterAccountNameSuccess);
 
 const styles$M = i$5`
   @keyframes shake {
@@ -16455,7 +17286,6 @@ let W3mOnRampActivityView = class W3mOnRampActivityView2 extends s$2 {
   constructor() {
     super();
     this.unsubscribe = [];
-    this.refetchTimeout = void 0;
     this.selectedOnRampProvider = OnRampController.state.selectedProvider;
     this.loading = false;
     this.coinbaseTransactions = TransactionsController.state.coinbaseTransactions;
@@ -16738,13 +17568,13 @@ let W3mOnRampProvidersView = class W3mOnRampProvidersView2 extends s$2 {
     if (!network?.name) {
       throw new Error("No network found");
     }
-    const defaultNetwork = ConstantsUtil$2.WC_COINBASE_PAY_SDK_CHAIN_NAME_MAP[network.name] ?? ConstantsUtil$2.WC_COINBASE_PAY_SDK_FALLBACK_CHAIN;
+    const defaultNetwork = ConstantsUtil$3.WC_COINBASE_PAY_SDK_CHAIN_NAME_MAP[network.name] ?? ConstantsUtil$3.WC_COINBASE_PAY_SDK_FALLBACK_CHAIN;
     const purchaseCurrency = OnRampController.state.purchaseCurrency;
     const assets = purchaseCurrency ? [purchaseCurrency.symbol] : OnRampController.state.purchaseCurrencies.map((currency) => currency.symbol);
     return await BlockchainApiController.generateOnRampURL({
       defaultNetwork,
       destinationWallets: [
-        { address, blockchains: ConstantsUtil$2.WC_COINBASE_PAY_SDK_CHAINS, assets }
+        { address, blockchains: ConstantsUtil$3.WC_COINBASE_PAY_SDK_CHAINS, assets }
       ],
       partnerUserId: address,
       purchaseAmount: OnRampController.state.purchaseAmount
@@ -16966,11 +17796,7 @@ let W3mSwapView = class W3mSwapView2 extends s$2 {
     this.toTokenPriceInUSD = SwapController.state.toTokenPriceInUSD;
     this.inputError = SwapController.state.inputError;
     this.gasPriceInUSD = SwapController.state.gasPriceInUSD;
-    this.priceImpact = SwapController.state.priceImpact;
-    this.maxSlippage = SwapController.state.maxSlippage;
-    this.providerFee = SwapController.state.providerFee;
     this.transactionLoading = SwapController.state.transactionLoading;
-    this.networkTokenSymbol = SwapController.state.networkTokenSymbol;
     this.fetchError = SwapController.state.fetchError;
     this.onDebouncedGetSwapCalldata = CoreHelperUtil.debounce(async () => {
       await SwapController.swapTokens();
@@ -17006,9 +17832,6 @@ let W3mSwapView = class W3mSwapView2 extends s$2 {
         this.toTokenPriceInUSD = newState.toTokenPriceInUSD;
         this.inputError = newState.inputError;
         this.gasPriceInUSD = newState.gasPriceInUSD;
-        this.priceImpact = newState.priceImpact;
-        this.maxSlippage = newState.maxSlippage;
-        this.providerFee = newState.providerFee;
         this.fetchError = newState.fetchError;
       })
     ]);
@@ -17037,7 +17860,7 @@ let W3mSwapView = class W3mSwapView2 extends s$2 {
   }
   templateSwap() {
     return x$2`
-      <wui-flex flexDirection="column" gap="l">
+      <wui-flex flexDirection="column" gap="s">
         <wui-flex flexDirection="column" alignItems="center" gap="xs" class="swap-inputs-container">
           ${this.templateTokenInput("sourceToken", this.sourceToken)}
           ${this.templateTokenInput("toToken", this.toToken)} ${this.templateReplaceTokensButton()}
@@ -17107,7 +17930,7 @@ let W3mSwapView = class W3mSwapView2 extends s$2 {
   }
   onSetMaxValue(target, balance) {
     const token = target === "sourceToken" ? this.sourceToken : this.toToken;
-    const isNetworkToken = token?.address === ConstantsUtil$2.NATIVE_TOKEN_ADDRESS;
+    const isNetworkToken = token?.address === ConstantsUtil$3.NATIVE_TOKEN_ADDRESS;
     let value = "0";
     if (!balance) {
       value = "0";
@@ -17124,29 +17947,10 @@ let W3mSwapView = class W3mSwapView2 extends s$2 {
     this.handleChangeAmount(target, maxValue.isGreaterThan(0) ? maxValue.toFixed(20) : "0");
   }
   templateDetails() {
-    if (this.inputError) {
+    if (!this.sourceToken || !this.toToken || this.inputError) {
       return null;
     }
-    if (!this.sourceToken || !this.toToken || !this.sourceTokenAmount || !this.toTokenAmount) {
-      return null;
-    }
-    const toTokenSwappedAmount = this.sourceTokenPriceInUSD && this.toTokenPriceInUSD ? 1 / this.toTokenPriceInUSD * this.sourceTokenPriceInUSD : 0;
-    return x$2`
-      <w3m-swap-details
-        .detailsOpen=${this.detailsOpen}
-        sourceTokenSymbol=${this.sourceToken?.symbol}
-        sourceTokenPrice=${this.sourceTokenPriceInUSD}
-        toTokenSymbol=${this.toToken?.symbol}
-        toTokenSwappedAmount=${toTokenSwappedAmount}
-        toTokenAmount=${this.toTokenAmount}
-        gasPriceInUSD=${this.gasPriceInUSD}
-        .priceImpact=${this.priceImpact}
-        slippageRate=${ConstantsUtil$2.CONVERT_SLIPPAGE_TOLERANCE}
-        .maxSlippage=${this.maxSlippage}
-        providerFee=${this.providerFee}
-        networkTokenSymbol=${this.networkTokenSymbol}
-      ></w3m-swap-details>
-    `;
+    return x$2`<w3m-swap-details .detailsOpen=${this.detailsOpen}></w3m-swap-details>`;
   }
   handleChangeAmount(target, value) {
     SwapController.clearError();
@@ -17233,19 +18037,7 @@ __decorate$13([
 ], W3mSwapView.prototype, "gasPriceInUSD", void 0);
 __decorate$13([
   r$3()
-], W3mSwapView.prototype, "priceImpact", void 0);
-__decorate$13([
-  r$3()
-], W3mSwapView.prototype, "maxSlippage", void 0);
-__decorate$13([
-  r$3()
-], W3mSwapView.prototype, "providerFee", void 0);
-__decorate$13([
-  r$3()
 ], W3mSwapView.prototype, "transactionLoading", void 0);
-__decorate$13([
-  r$3()
-], W3mSwapView.prototype, "networkTokenSymbol", void 0);
 __decorate$13([
   r$3()
 ], W3mSwapView.prototype, "fetchError", void 0);
@@ -17412,9 +18204,8 @@ let W3mSwapPreviewView = class W3mSwapPreviewView2 extends s$2 {
     this.transactionLoading = SwapController.state.transactionLoading;
     this.balanceSymbol = AccountController.state.balanceSymbol;
     this.gasPriceInUSD = SwapController.state.gasPriceInUSD;
-    this.priceImpact = SwapController.state.priceImpact;
-    this.maxSlippage = SwapController.state.maxSlippage;
-    this.providerFee = SwapController.state.providerFee;
+    this.inputError = SwapController.state.inputError;
+    this.loading = SwapController.state.loading;
     this.unsubscribe.push(...[
       AccountController.subscribeKey("balanceSymbol", (newBalanceSymbol) => {
         if (this.balanceSymbol !== newBalanceSymbol) {
@@ -17437,18 +18228,30 @@ let W3mSwapPreviewView = class W3mSwapPreviewView2 extends s$2 {
         this.toTokenPriceInUSD = newState.toTokenPriceInUSD;
         this.sourceTokenAmount = newState.sourceTokenAmount ?? "";
         this.toTokenAmount = newState.toTokenAmount ?? "";
-        this.priceImpact = newState.priceImpact;
-        this.maxSlippage = newState.maxSlippage;
-        this.providerFee = newState.providerFee;
+        this.inputError = newState.inputError;
+        this.loading = newState.loading;
       })
     ]);
   }
+  firstUpdated() {
+    SwapController.getTransaction();
+    this.refreshTransaction();
+  }
+  disconnectedCallback() {
+    this.unsubscribe.forEach((unsubscribe) => unsubscribe?.());
+    clearInterval(this.interval);
+  }
   render() {
     return x$2`
-      <wui-flex flexDirection="column" .padding=${["0", "l", "l", "l"]} gap="s"
-        >${this.templateSwap()}</wui-flex
-      >
+      <wui-flex flexDirection="column" .padding=${["0", "l", "l", "l"]} gap="s">
+        ${this.templateSwap()}
+      </wui-flex>
     `;
+  }
+  refreshTransaction() {
+    this.interval = setInterval(() => {
+      SwapController.getTransaction();
+    }, 1e4);
   }
   templateSwap() {
     const sourceTokenText = `${UiHelperUtil.formatNumberToLocalString(parseFloat(this.sourceTokenAmount))} ${this.sourceToken?.symbol}`;
@@ -17527,6 +18330,7 @@ let W3mSwapPreviewView = class W3mSwapPreviewView2 extends s$2 {
             size="lg"
             borderRadius="xs"
             variant="main"
+            ?loading=${this.loading}
             ?disabled=${this.transactionLoading}
             @click=${this.onSendTransaction.bind(this)}
           >
@@ -17539,22 +18343,10 @@ let W3mSwapPreviewView = class W3mSwapPreviewView2 extends s$2 {
     `;
   }
   templateDetails() {
-    const toTokenSwappedAmount = this.sourceTokenPriceInUSD && this.toTokenPriceInUSD ? 1 / this.toTokenPriceInUSD * this.sourceTokenPriceInUSD : 0;
-    return x$2`
-      <w3m-swap-details
-        detailsOpen=${this.detailsOpen}
-        sourceTokenSymbol=${this.sourceToken?.symbol}
-        sourceTokenPrice=${this.sourceTokenPriceInUSD}
-        toTokenSymbol=${this.toToken?.symbol}
-        toTokenSwappedAmount=${toTokenSwappedAmount}
-        toTokenAmount=${this.toTokenAmount}
-        gasPriceInUSD=${UiHelperUtil.formatNumberToLocalString(this.gasPriceInUSD, 3)}
-        .priceImpact=${this.priceImpact}
-        slippageRate=${ConstantsUtil$2.CONVERT_SLIPPAGE_TOLERANCE}
-        .maxSlippage=${this.maxSlippage}
-        providerFee=${this.providerFee}
-      ></w3m-swap-details>
-    `;
+    if (!this.sourceToken || !this.toToken || this.inputError) {
+      return null;
+    }
+    return x$2`<w3m-swap-details .detailsOpen=${this.detailsOpen}></w3m-swap-details>`;
   }
   actionButtonLabel() {
     if (this.approvalTransaction) {
@@ -17574,6 +18366,9 @@ let W3mSwapPreviewView = class W3mSwapPreviewView2 extends s$2 {
   }
 };
 W3mSwapPreviewView.styles = styles$G;
+__decorate$12([
+  r$3()
+], W3mSwapPreviewView.prototype, "interval", void 0);
 __decorate$12([
   r$3()
 ], W3mSwapPreviewView.prototype, "detailsOpen", void 0);
@@ -17615,13 +18410,10 @@ __decorate$12([
 ], W3mSwapPreviewView.prototype, "gasPriceInUSD", void 0);
 __decorate$12([
   r$3()
-], W3mSwapPreviewView.prototype, "priceImpact", void 0);
+], W3mSwapPreviewView.prototype, "inputError", void 0);
 __decorate$12([
   r$3()
-], W3mSwapPreviewView.prototype, "maxSlippage", void 0);
-__decorate$12([
-  r$3()
-], W3mSwapPreviewView.prototype, "providerFee", void 0);
+], W3mSwapPreviewView.prototype, "loading", void 0);
 W3mSwapPreviewView = __decorate$12([
   customElement("w3m-swap-preview-view")
 ], W3mSwapPreviewView);
@@ -18334,7 +19126,7 @@ let W3mEmailVerifyDeviceView = class W3mEmailVerifyDeviceView2 extends s$2 {
       throw new Error("w3m-email-verify-device-view: No email provided");
     }
     if (!this.authConnector) {
-      throw new Error("w3m-email-verify-device-view: No email connector provided");
+      throw new Error("w3m-email-verify-device-view: No auth connector provided");
     }
     return x$2`
       <wui-flex
@@ -18545,8 +19337,8 @@ let W3mUpgradeWalletView = class W3mUpgradeWalletView2 extends s$2 {
         <wui-chip
           icon="externalLink"
           variant="fill"
-          href=${ConstantsUtil$2.SECURE_SITE_DASHBOARD}
-          imageSrc=${ConstantsUtil$2.SECURE_SITE_FAVICON}
+          href=${ConstantsUtil$3.SECURE_SITE_DASHBOARD}
+          imageSrc=${ConstantsUtil$3.SECURE_SITE_FAVICON}
           data-testid="w3m-secure-website-button"
         >
         </wui-chip>
@@ -18580,8 +19372,10 @@ let W3mUpgradeToSmartAccountView = class W3mUpgradeToSmartAccountView2 extends s
       if (this.authConnector) {
         try {
           this.loading = true;
+          ModalController.setLoading(true);
           await this.authConnector.provider.setPreferredAccount(W3mFrameRpcConstants.ACCOUNT_TYPES.SMART_ACCOUNT);
           await ConnectionController.reconnectExternal(this.authConnector);
+          ModalController.setLoading(false);
           this.loading = false;
           RouterUtil.navigateAfterPreferredAccountTypeSelect();
         } catch (e) {
@@ -18599,7 +19393,11 @@ let W3mUpgradeToSmartAccountView = class W3mUpgradeToSmartAccountView2 extends s
         .padding=${["0", "0", "l", "0"]}
       >
         ${this.onboardingTemplate()} ${this.buttonsTemplate()}
-        <wui-link>
+        <wui-link
+          @click=${() => {
+      CoreHelperUtil.openHref(NavigationUtil.URLS.FAQ, "_blank");
+    }}
+        >
           Learn more
           <wui-icon color="inherit" slot="iconRight" name="externalLink"></wui-icon>
         </wui-link>
@@ -18744,7 +19542,7 @@ let W3mUpdateEmailWalletView = class W3mUpdateEmailWalletView2 extends s$2 {
       event.preventDefault();
       const authConnector = ConnectorController.getAuthConnector();
       if (!authConnector) {
-        throw new Error("w3m-update-email-wallet: Email connector not found");
+        throw new Error("w3m-update-email-wallet: Auth connector not found");
       }
       const response = await authConnector.provider.updateEmail({ email: this.email });
       EventsController.sendEvent({ type: "track", event: "EMAIL_EDIT" });
@@ -18926,7 +19724,7 @@ let W3mUnsupportedChainView = class W3mUnsupportedChainView2 extends s$2 {
   networksTemplate() {
     const { approvedCaipNetworkIds, requestedCaipNetworks } = NetworkController.state;
     const sortedNetworks = CoreHelperUtil.sortRequestedNetworks(approvedCaipNetworkIds, requestedCaipNetworks);
-    const filteredNetworks = this.swapUnsupportedChain ? sortedNetworks.filter((network) => ConstantsUtil$2.SWAP_SUPPORTED_NETWORKS.includes(network.id)) : sortedNetworks;
+    const filteredNetworks = this.swapUnsupportedChain ? sortedNetworks.filter((network) => ConstantsUtil$3.SWAP_SUPPORTED_NETWORKS.includes(network.id)) : sortedNetworks;
     return filteredNetworks.map((network) => x$2`
         <wui-list-network
           imageSrc=${o$3(AssetUtil.getNetworkImage(network))}
@@ -20726,28 +21524,56 @@ var __decorate$x = function(decorators, target, key, desc) {
         r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
   return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+const slippageRate = ConstantsUtil$3.CONVERT_SLIPPAGE_TOLERANCE;
 let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
   constructor() {
-    super(...arguments);
+    super();
+    this.unsubscribe = [];
     this.networkName = NetworkController.state.caipNetwork?.name;
     this.detailsOpen = false;
-    this.slippageRate = 1;
+    this.sourceToken = SwapController.state.sourceToken;
+    this.toToken = SwapController.state.toToken;
+    this.toTokenAmount = SwapController.state.toTokenAmount;
+    this.sourceTokenPriceInUSD = SwapController.state.sourceTokenPriceInUSD;
+    this.toTokenPriceInUSD = SwapController.state.toTokenPriceInUSD;
+    this.gasPriceInUSD = SwapController.state.gasPriceInUSD;
+    this.priceImpact = SwapController.state.priceImpact;
+    this.maxSlippage = SwapController.state.maxSlippage;
+    this.networkTokenSymbol = SwapController.state.networkTokenSymbol;
+    this.inputError = SwapController.state.inputError;
+    this.unsubscribe.push(...[
+      SwapController.subscribe((newState) => {
+        this.sourceToken = newState.sourceToken;
+        this.toToken = newState.toToken;
+        this.toTokenAmount = newState.toTokenAmount;
+        this.gasPriceInUSD = newState.gasPriceInUSD;
+        this.priceImpact = newState.priceImpact;
+        this.maxSlippage = newState.maxSlippage;
+        this.sourceTokenPriceInUSD = newState.sourceTokenPriceInUSD;
+        this.toTokenPriceInUSD = newState.toTokenPriceInUSD;
+        this.inputError = newState.inputError;
+      })
+    ]);
   }
   render() {
     const minReceivedAmount = this.toTokenAmount && this.maxSlippage ? NumberUtil.bigNumber(this.toTokenAmount).minus(this.maxSlippage).toString() : null;
+    if (!this.sourceToken || !this.toToken || this.inputError) {
+      return null;
+    }
+    const toTokenSwappedAmount = this.sourceTokenPriceInUSD && this.toTokenPriceInUSD ? 1 / this.toTokenPriceInUSD * this.sourceTokenPriceInUSD : 0;
     return x$2`
       <wui-flex flexDirection="column" alignItems="center" gap="1xs" class="details-container">
         <wui-flex flexDirection="column">
           <button @click=${this.toggleDetails.bind(this)}>
             <wui-flex justifyContent="space-between" .padding=${["0", "xs", "0", "xs"]}>
               <wui-flex justifyContent="flex-start" flexGrow="1" gap="xs">
-                <wui-text variant="small-400" color="fg-100"
-                  >1 ${this.sourceTokenSymbol} =
-                  ${UiHelperUtil.formatNumberToLocalString(this.toTokenSwappedAmount, 3)}
-                  ${this.toTokenSymbol}</wui-text
-                >
+                <wui-text variant="small-400" color="fg-100">
+                  1 ${this.sourceToken.symbol} =
+                  ${UiHelperUtil.formatNumberToLocalString(toTokenSwappedAmount, 3)}
+                  ${this.toToken.symbol}
+                </wui-text>
                 <wui-text variant="small-400" color="fg-200">
-                  $${UiHelperUtil.formatNumberToLocalString(this.sourceTokenPrice)}
+                  $${UiHelperUtil.formatNumberToLocalString(this.sourceTokenPriceInUSD)}
                 </wui-text>
               </wui-flex>
               <wui-icon name="chevronBottom"></wui-icon>
@@ -20799,7 +21625,7 @@ let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
                           </wui-flex>
                         </wui-flex>
                       </wui-flex>` : null}
-                  ${this.maxSlippage && this.sourceTokenSymbol ? x$2`<wui-flex flexDirection="column" gap="xs">
+                  ${this.maxSlippage && this.sourceToken.symbol ? x$2`<wui-flex flexDirection="column" gap="xs">
                         <wui-flex
                           justifyContent="space-between"
                           alignItems="center"
@@ -20810,7 +21636,7 @@ let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
                               Max. slippage
                             </wui-text>
                             <w3m-tooltip-trigger
-                              text=${`Max slippage sets the minimum amount you must receive for the transaction to proceed. ${minReceivedAmount ? `Transaction will be reversed if you receive less than ${UiHelperUtil.formatNumberToLocalString(minReceivedAmount, 6)} ${this.toTokenSymbol} due to price changes.` : ""}`}
+                              text=${`Max slippage sets the minimum amount you must receive for the transaction to proceed. ${minReceivedAmount ? `Transaction will be reversed if you receive less than ${UiHelperUtil.formatNumberToLocalString(minReceivedAmount, 6)} ${this.toToken.symbol} due to price changes.` : ""}`}
                             >
                               <wui-icon size="xs" color="fg-250" name="infoCircle"></wui-icon>
                             </w3m-tooltip-trigger>
@@ -20818,7 +21644,7 @@ let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
                           <wui-flex>
                             <wui-text variant="small-400" color="fg-200">
                               ${UiHelperUtil.formatNumberToLocalString(this.maxSlippage, 6)}
-                              ${this.toTokenSymbol} ${this.slippageRate}%
+                              ${this.toToken.symbol} ${slippageRate}%
                             </wui-text>
                           </wui-flex>
                         </wui-flex>
@@ -20831,16 +21657,11 @@ let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
                     >
                       <wui-flex alignItems="center" gap="xs">
                         <wui-text class="details-row-title" variant="small-400" color="fg-150">
-                          Provider fee (0.85%)
+                          Provider fee
                         </wui-text>
                       </wui-flex>
                       <wui-flex>
-                        ${this.providerFee ? x$2`
-                              <wui-text variant="small-400" color="fg-200">
-                                ${UiHelperUtil.formatNumberToLocalString(this.providerFee, 6)}
-                                ${this.sourceTokenSymbol}
-                              </wui-text>
-                            ` : null}
+                        <wui-text variant="small-400" color="fg-200">0.85%</wui-text>
                       </wui-flex>
                     </wui-flex>
                   </wui-flex>
@@ -20856,44 +21677,41 @@ let WuiSwapDetails = class WuiSwapDetails2 extends s$2 {
 };
 WuiSwapDetails.styles = [styles$n];
 __decorate$x([
-  n$6()
+  r$3()
 ], WuiSwapDetails.prototype, "networkName", void 0);
 __decorate$x([
   n$6()
 ], WuiSwapDetails.prototype, "detailsOpen", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "sourceTokenSymbol", void 0);
+  r$3()
+], WuiSwapDetails.prototype, "sourceToken", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "sourceTokenPrice", void 0);
+  r$3()
+], WuiSwapDetails.prototype, "toToken", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "toTokenSymbol", void 0);
-__decorate$x([
-  n$6()
+  r$3()
 ], WuiSwapDetails.prototype, "toTokenAmount", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "toTokenSwappedAmount", void 0);
+  r$3()
+], WuiSwapDetails.prototype, "sourceTokenPriceInUSD", void 0);
 __decorate$x([
-  n$6()
+  r$3()
+], WuiSwapDetails.prototype, "toTokenPriceInUSD", void 0);
+__decorate$x([
+  r$3()
 ], WuiSwapDetails.prototype, "gasPriceInUSD", void 0);
 __decorate$x([
-  n$6()
+  r$3()
 ], WuiSwapDetails.prototype, "priceImpact", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "slippageRate", void 0);
-__decorate$x([
-  n$6()
+  r$3()
 ], WuiSwapDetails.prototype, "maxSlippage", void 0);
 __decorate$x([
-  n$6()
-], WuiSwapDetails.prototype, "providerFee", void 0);
-__decorate$x([
-  n$6()
+  r$3()
 ], WuiSwapDetails.prototype, "networkTokenSymbol", void 0);
+__decorate$x([
+  r$3()
+], WuiSwapDetails.prototype, "inputError", void 0);
 WuiSwapDetails = __decorate$x([
   customElement("w3m-swap-details")
 ], WuiSwapDetails);
@@ -20960,6 +21778,7 @@ const styles$m = i$5`
     outline: none;
     caret-color: var(--wui-color-accent-100);
     color: var(--wui-color-fg-100);
+    padding: 0px;
   }
 
   :host > wui-flex .swap-input input:focus-visible {
@@ -21025,6 +21844,8 @@ let W3mSwapInput = class W3mSwapInput2 extends s$2 {
             @input=${this.dispatchInputChangeEvent}
             @keydown=${this.handleKeydown}
             placeholder="0"
+            type="text"
+            inputmode="decimal"
           />
           <wui-text class="market-value" variant="small-400" color="fg-200">
             ${isMarketValueGreaterThanZero ? `$${UiHelperUtil.formatNumberToLocalString(this.marketValue, 3)}` : null}
@@ -21035,35 +21856,13 @@ let W3mSwapInput = class W3mSwapInput2 extends s$2 {
     `;
   }
   handleKeydown(event) {
-    const allowedKeys = [
-      "Backspace",
-      "Meta",
-      "Ctrl",
-      "a",
-      "c",
-      "v",
-      "ArrowLeft",
-      "ArrowRight",
-      "Tab"
-    ];
-    const isComma = event.key === ",";
-    const isDot = event.key === ".";
-    const isNumericKey = event.key >= "0" && event.key <= "9";
-    const currentValue = this.value;
-    if (!isNumericKey && !allowedKeys.includes(event.key) && !isDot && !isComma) {
-      event.preventDefault();
-    }
-    if (isComma || isDot) {
-      if (currentValue?.includes(".") || currentValue?.includes(",")) {
-        event.preventDefault();
-      }
-    }
+    return InputUtil.numericInputKeyDown(event, this.value, (value) => this.onSetAmount?.(this.target, value));
   }
   dispatchInputChangeEvent(event) {
     if (!this.onSetAmount) {
       return;
     }
-    const value = event.target.value;
+    const value = event.target.value.replace(/[^0-9.]/gu, "");
     if (value === "," || value === ".") {
       this.onSetAmount(this.target, "0.");
     } else if (value.endsWith(",")) {
@@ -21297,6 +22096,7 @@ var __decorate$u = function(decorators, target, key, desc) {
         r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
   return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+const BETA_SCREENS = ["Swap", "SwapSelectToken", "SwapPreview"];
 function headings() {
   const connectorName = RouterController.state.data?.connector?.name;
   const walletName = RouterController.state.data?.wallet?.name;
@@ -21306,6 +22106,7 @@ function headings() {
   const isEmail = connectors.length === 1 && connectors[0]?.id === "w3m-email";
   return {
     Connect: `Connect ${isEmail ? "Email" : ""} Wallet`,
+    ChooseAccountName: void 0,
     Account: void 0,
     AccountSettings: void 0,
     ConnectingExternal: name ?? "Connect Wallet",
@@ -21334,6 +22135,8 @@ function headings() {
     BuyInProgress: "Buy",
     OnRampTokenSelect: "Select Token",
     OnRampFiatSelect: "Select Currency",
+    RegisterAccountName: "Choose name",
+    RegisterAccountNameSuccess: "",
     WalletReceive: "Receive",
     WalletCompatibleNetworks: "Compatible Networks",
     Swap: "Swap",
@@ -21389,7 +22192,13 @@ let W3mHeader = class W3mHeader2 extends s$2 {
     ModalController.close();
   }
   titleTemplate() {
-    return x$2`<wui-text variant="paragraph-700" color="fg-100">${this.heading}</wui-text>`;
+    const isBeta = BETA_SCREENS.includes(RouterController.state.view);
+    return x$2`
+      <wui-flex class="w3m-header-title" alignItems="center" gap="xs">
+        <wui-text variant="paragraph-700" color="fg-100">${this.heading}</wui-text>
+        ${isBeta ? x$2`<wui-tag variant="main">Beta</wui-tag>` : null}
+      </wui-flex>
+    `;
   }
   dynamicButtonTemplate() {
     const { view } = RouterController.state;
@@ -21420,7 +22229,7 @@ let W3mHeader = class W3mHeader2 extends s$2 {
     return ["l", "2l", "0", "2l"];
   }
   async onViewChange(view) {
-    const headingEl = this.shadowRoot?.querySelector("wui-text");
+    const headingEl = this.shadowRoot?.querySelector("wui-flex.w3m-header-title");
     if (headingEl) {
       const preset = headings()[view];
       await headingEl.animate([{ opacity: 1 }, { opacity: 0 }], {
@@ -22093,7 +22902,7 @@ let W3mEmailLoginWidget = class W3mEmailLoginWidget2 extends s$2 {
       event.preventDefault();
       const authConnector = ConnectorController.getAuthConnector();
       if (!authConnector) {
-        throw new Error("w3m-email-login-widget: Email connector not found");
+        throw new Error("w3m-email-login-widget: Auth connector not found");
       }
       const { action } = await authConnector.provider.connectEmail({ email: this.email });
       EventsController.sendEvent({ type: "track", event: "EMAIL_SUBMITTED" });
@@ -22392,7 +23201,7 @@ let W3mAccountDefaultWidget = class W3mAccountDefaultWidget2 extends s$2 {
     const type = StorageUtil.getConnectedConnector();
     const authConnector = ConnectorController.getAuthConnector();
     const { origin } = location;
-    if (!authConnector || type !== "AUTH" || origin.includes(ConstantsUtil$2.SECURE_SITE)) {
+    if (!authConnector || type !== "AUTH" || origin.includes(ConstantsUtil$3.SECURE_SITE)) {
       return null;
     }
     return x$2`
@@ -22700,7 +23509,7 @@ let W3mAccountWalletFeaturesWidget = class W3mAccountWalletFeaturesWidget2 exten
     RouterController.push("OnRampProviders");
   }
   onSwapClick() {
-    if (this.network?.id && !ConstantsUtil$2.SWAP_SUPPORTED_NETWORKS.includes(this.network?.id)) {
+    if (this.network?.id && !ConstantsUtil$3.SWAP_SUPPORTED_NETWORKS.includes(this.network?.id)) {
       RouterController.push("UnsupportedChain", {
         swapUnsupportedChain: true
       });
@@ -24765,6 +25574,15 @@ class Web3ModalScaffold {
     this.setPreferredAccountType = (preferredAccountType) => {
       AccountController.setPreferredAccountType(preferredAccountType);
     };
+    this.getWalletConnectName = (address) => {
+      return EnsController.getNamesForAddress(address);
+    };
+    this.resolveWalletConnectName = async (name) => {
+      const trimmedName = name.replace(ConstantsUtil$2.WC_NAME_SUFFIX, "");
+      const wcNameAddress = await EnsController.resolveName(trimmedName);
+      const networkNameAddresses = Object.values(wcNameAddress?.addresses) || [];
+      return networkNameAddresses[0]?.address || false;
+    };
     this.initControllers(options);
     this.initOrContinue();
   }
@@ -24906,7 +25724,7 @@ const ConstantsUtil = {
   CONNECTOR_RDNS_MAP: {
     coinbaseWallet: "com.coinbase.wallet"
   },
-  VERSION: "4.2.1"
+  VERSION: "4.2.2"
 };
 
 const PresetsUtil = {
@@ -25868,16 +26686,21 @@ class Web3Modal extends Web3ModalScaffold {
         throw new Error("Contract method is undefined");
       },
       getEnsAddress: async (value) => {
-        const { chainId } = EthersStoreUtil.state;
-        if (chainId && chainId === 1) {
-          const ensProvider = new InfuraProvider("mainnet");
-          const name = await ensProvider.resolveName(value);
-          if (name) {
-            return name;
+        try {
+          const chainId = NetworkUtil.caipNetworkIdToNumber(this.getCaipNetwork()?.id);
+          let ensName = null;
+          let wcName = false;
+          if (value?.endsWith(ConstantsUtil$2.WC_NAME_SUFFIX)) {
+            wcName = await this.resolveWalletConnectName(value);
           }
+          if (chainId === 1) {
+            const ensProvider = new InfuraProvider("mainnet");
+            ensName = await ensProvider.resolveName(value);
+          }
+          return ensName || wcName || false;
+        } catch {
           return false;
         }
-        return false;
       },
       getEnsAvatar: async (value) => {
         const { chainId } = EthersStoreUtil.state;
@@ -26149,6 +26972,7 @@ class Web3Modal extends Web3ModalScaffold {
   async setAuthProvider() {
     window?.localStorage.setItem(EthersConstantsUtil.WALLET_ID, ConstantsUtil.AUTH_CONNECTOR_ID);
     if (this.authProvider) {
+      super.setLoading(true);
       const { address, chainId, smartAccountDeployed, preferredAccountType } = await this.authProvider.connect({ chainId: this.getChainId() });
       const { smartAccountEnabledNetworks } = await this.authProvider.getSmartAccountEnabledNetworks();
       this.setSmartAccountEnabledNetworks(smartAccountEnabledNetworks);
@@ -26346,12 +27170,13 @@ class Web3Modal extends Web3ModalScaffold {
         if (!address) {
           return;
         }
+        super.setLoading(true);
         const chainId = NetworkUtil.caipNetworkIdToNumber(this.getCaipNetwork()?.id);
         EthersStoreUtil.setAddress(address);
         EthersStoreUtil.setChainId(chainId);
         EthersStoreUtil.setIsConnected(true);
         EthersStoreUtil.setPreferredAccountType(type);
-        this.syncAccount();
+        this.syncAccount().then(() => super.setLoading(false));
       });
     }
   }
@@ -26422,6 +27247,19 @@ class Web3Modal extends Web3ModalScaffold {
       }
     }
   }
+  async syncWalletConnectName(address) {
+    try {
+      const registeredWcNames = await this.getWalletConnectName(address);
+      if (registeredWcNames[0]) {
+        const wcName = registeredWcNames[0];
+        this.setProfileName(wcName.name);
+      } else {
+        this.setProfileName(null);
+      }
+    } catch {
+      this.setProfileName(null);
+    }
+  }
   async syncProfile(address) {
     const chainId = EthersStoreUtil.state.chainId;
     try {
@@ -26430,6 +27268,9 @@ class Web3Modal extends Web3ModalScaffold {
       });
       this.setProfileName(name);
       this.setProfileImage(avatar);
+      if (!name) {
+        await this.syncWalletConnectName(address);
+      }
     } catch {
       if (chainId === 1) {
         const ensProvider = new InfuraProvider("mainnet");
@@ -26437,12 +27278,14 @@ class Web3Modal extends Web3ModalScaffold {
         const avatar = await ensProvider.getAvatar(address);
         if (name) {
           this.setProfileName(name);
+        } else {
+          await this.syncWalletConnectName(address);
         }
         if (avatar) {
           this.setProfileImage(avatar);
         }
       } else {
-        this.setProfileName(null);
+        await this.syncWalletConnectName(address);
         this.setProfileImage(null);
       }
     }
@@ -26570,6 +27413,7 @@ class Web3Modal extends Web3ModalScaffold {
       } else if (providerType === ConstantsUtil.AUTH_CONNECTOR_ID) {
         if (this.authProvider && chain?.chainId) {
           try {
+            super.setLoading(true);
             await this.authProvider.switchNetwork(chain?.chainId);
             EthersStoreUtil.setChainId(chain.chainId);
             const { address, preferredAccountType } = await this.authProvider.connect({
@@ -26582,6 +27426,8 @@ class Web3Modal extends Web3ModalScaffold {
             await this.syncAccount();
           } catch {
             throw new Error("Switching chain failed");
+          } finally {
+            super.setLoading(false);
           }
         }
       }
@@ -26727,4 +27573,4 @@ function createWeb3Modal(options) {
   return new Web3Modal({ ...options, _sdkVersion: `html-ethers-${ConstantsUtil.VERSION}` });
 }
 
-export { WuiLogo as $, AccountController as A, WuiChip as B, ConnectionController as C, WuiConnectButton as D, EventsController as E, WuiCtaButton as F, WuiDetailsGroup as G, WuiDetailsGroupItem as H, WuiEmailInput as I, WuiIconBox as J, WuiIconLink as K, WuiInputElement as L, ModalController as M, WuiInputNumeric as N, OptionsController as O, WuiInputText as P, WuiLink as Q, RouterController as R, StorageUtil as S, TransactionUtil as T, UiHelperUtil as U, WuiListItem as V, W3mFrameRpcConstants as W, WuiTransactionListItem as X, WuiTransactionListItemLoader as Y, WuiListWallet as Z, WuiLogoSelect as _, SnackController as a, WuiNetworkButton as a0, WuiNetworkImage as a1, WuiOtp as a2, WuiQrCode as a3, WuiSearchBar as a4, WuiSnackbar as a5, WuiTabs as a6, WuiTokenButton as a7, WuiTag as a8, WuiTooltip as a9, WuiSeparator as aA, createWeb3Modal as aB, defaultConfig as aC, WuiTokenListItem as aa, WuiTransactionVisual as ab, WuiVisualThumbnail as ac, WuiWalletImage as ad, WuiNoticeCard as ae, WuiListAccordion as af, WuiListContent as ag, WuiListNetwork as ah, WuiListWalletTransaction as ai, WuiOnRampActivityItem as aj, WuiOnRampProviderItem as ak, WuiPromo as al, WuiBalance as am, WuiProfileButton as an, WuiChipButton as ao, WuiCompatibleNetwork as ap, WuiBanner as aq, WuiListToken as ar, WuiListDescription as as, WuiInputAmount as at, WuiPreviewItem as au, WuiIconButton as av, WuiListButton as aw, WuiListSocial as ax, WuiFlex as ay, WuiGrid as az, b$4 as b, customElement as c, MathUtil as d, initializeTheming as e, setColorTheme as f, setThemeVariables as g, WuiCard as h, i$5 as i, WuiIcon as j, WuiImage as k, WuiLoadingHexagon as l, WuiLoadingSpinner as m, WuiLoadingThumbnail as n, WuiShimmer as o, WuiText as p, WuiVisual as q, r$3 as r, s$2 as s, WuiAccountButton as t, WuiAllWalletsImage as u, WuiAvatar as v, WuiButton as w, x$2 as x, WuiCardSelectLoader as y, WuiCardSelect as z };
+export { WuiLogoSelect as $, AccountController as A, WuiChip as B, ConnectionController as C, WuiConnectButton as D, EventsController as E, WuiCtaButton as F, WuiDetailsGroup as G, WuiDetailsGroupItem as H, WuiEmailInput as I, WuiEnsInput as J, WuiIconBox as K, WuiIconLink as L, ModalController as M, WuiInputElement as N, OptionsController as O, WuiInputNumeric as P, WuiInputText as Q, RouterController as R, StorageUtil as S, TransactionUtil as T, UiHelperUtil as U, WuiLink as V, W3mFrameRpcConstants as W, WuiListItem as X, WuiTransactionListItem as Y, WuiTransactionListItemLoader as Z, WuiListWallet as _, SnackController as a, WuiLogo as a0, WuiNetworkButton as a1, WuiNetworkImage as a2, WuiOtp as a3, WuiQrCode as a4, WuiSearchBar as a5, WuiSnackbar as a6, WuiTabs as a7, WuiTokenButton as a8, WuiTag as a9, WuiGrid as aA, WuiSeparator as aB, createWeb3Modal as aC, defaultConfig as aD, WuiTooltip as aa, WuiTokenListItem as ab, WuiTransactionVisual as ac, WuiVisualThumbnail as ad, WuiWalletImage as ae, WuiNoticeCard as af, WuiListAccordion as ag, WuiListContent as ah, WuiListNetwork as ai, WuiListWalletTransaction as aj, WuiOnRampActivityItem as ak, WuiOnRampProviderItem as al, WuiPromo as am, WuiBalance as an, WuiProfileButton as ao, WuiChipButton as ap, WuiCompatibleNetwork as aq, WuiBanner as ar, WuiListToken as as, WuiListDescription as at, WuiInputAmount as au, WuiPreviewItem as av, WuiIconButton as aw, WuiListButton as ax, WuiListSocial as ay, WuiFlex as az, b$4 as b, customElement as c, MathUtil as d, initializeTheming as e, setColorTheme as f, setThemeVariables as g, WuiCard as h, i$5 as i, WuiIcon as j, WuiImage as k, WuiLoadingHexagon as l, WuiLoadingSpinner as m, WuiLoadingThumbnail as n, WuiShimmer as o, WuiText as p, WuiVisual as q, r$3 as r, s$2 as s, WuiAccountButton as t, WuiAllWalletsImage as u, WuiAvatar as v, WuiButton as w, x$2 as x, WuiCardSelectLoader as y, WuiCardSelect as z };
