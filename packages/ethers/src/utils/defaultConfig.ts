@@ -1,6 +1,7 @@
 import '@web3modal/polyfills'
 import type { Metadata, Provider, ProviderType } from '@web3modal/scaffold-utils/ethers'
-import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk'
+// 暂不需要
+//import { CoinbaseWalletSDK } from '@coinbase/wallet-sdk'
 import type { SocialProvider } from '@web3modal/scaffold-utils'
 
 export interface ConfigOptions {
@@ -32,7 +33,7 @@ export function defaultConfig(options: ConfigOptions) {
   let injectedProvider: Provider | undefined = undefined
 
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-  let coinbaseProvider: Provider | undefined = undefined
+  //let coinbaseProvider: Provider | undefined = undefined
 
   const providers: ProviderType = { metadata }
 
@@ -55,33 +56,34 @@ export function defaultConfig(options: ConfigOptions) {
     return injectedProvider
   }
 
-  function getCoinbaseProvider() {
-    if (coinbaseProvider) {
-      return coinbaseProvider
-    }
+  //function getCoinbaseProvider() {
+  //  if (coinbaseProvider) {
+  //    return coinbaseProvider
+  //  }
 
-    if (typeof window === 'undefined') {
-      return undefined
-    }
+  //  if (typeof window === 'undefined') {
+  //    return undefined
+  //  }
 
-    const coinbaseWallet = new CoinbaseWalletSDK({
-      appName: metadata.name,
-      appLogoUrl: metadata.icons[0],
-      darkMode: false,
-      enableMobileWalletLink: true
-    })
+  //  const coinbaseWallet = new CoinbaseWalletSDK({
+  //    appName: metadata.name,
+  //    appLogoUrl: metadata.icons[0],
+  //    darkMode: false,
+  //    enableMobileWalletLink: true
+  //  })
 
-    coinbaseProvider = coinbaseWallet.makeWeb3Provider(rpcUrl, defaultChainId)
+  //  coinbaseProvider = coinbaseWallet.makeWeb3Provider(rpcUrl, defaultChainId)
 
-    return coinbaseProvider
-  }
+  //  return coinbaseProvider
+  //}
 
   if (enableInjected) {
     providers.injected = getInjectedProvider()
   }
 
   if (enableCoinbase && rpcUrl && defaultChainId) {
-    providers.coinbase = getCoinbaseProvider()
+    throw new Error('Coinbase is not supported yet')
+    //providers.coinbase = getCoinbaseProvider()
   }
 
   if (enableEIP6963) {
