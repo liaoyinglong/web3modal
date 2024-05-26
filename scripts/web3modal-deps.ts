@@ -1,6 +1,7 @@
 import Bun from 'bun'
 import path from 'path'
 import fs from 'fs/promises'
+import { getExternals } from './getExternals'
 const glob = new Bun.Glob('**/package.json')
 
 let scannedFiles = await Array.fromAsync(
@@ -28,16 +29,7 @@ for (const v of filteredFiles) {
   )
 }
 
-const uniqDeps = [...new Set(deps)]
-  .filter(
-    v =>
-      !v.includes('@types') &&
-      !v.includes('@walletconnect') &&
-      !v.includes('@web3modal') &&
-      !v.startsWith('lit') &&
-      !v.startsWith('@lit/')
-  )
-  .sort()
+const uniqDeps = getExternals([...new Set(deps)])
 
 await Bun.write(
   path.resolve(__dirname, '..', 'packages/ethers/externals-web3modal.json'),
