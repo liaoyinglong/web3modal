@@ -30,7 +30,8 @@
     "publish:latest": "npm install; npm run build; changeset publish",
     "publish:alpha": "npm install; npm run build; changeset publish --tag alpha",
     "publish:beta": "npm install; npm run build; changeset publish --tag beta",
-    "publish:canary": "npm install; npm run build; changeset publish --tag canary"
+    "publish:canary": "npm install; npm run build; changeset publish --tag canary",
+    "postinstall": "cd ./scripts && bun run web3modal-deps.ts && bun run wallectconnect-fix.ts"
   },
   "workspaces": [
     "packages/common",
@@ -53,6 +54,7 @@
   "devDependencies": {
     "@changesets/changelog-github": "0.5.0",
     "@changesets/cli": "2.27.1",
+    "@types/bun": "^1.1.3",
     "@typescript-eslint/eslint-plugin": "6.18.1",
     "@typescript-eslint/parser": "6.18.1",
     "danger": "11.3.1",

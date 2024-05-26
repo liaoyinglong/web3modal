@@ -40,10 +40,10 @@
     "build": "tsc --build",
     "watch": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "unbuild": "unbuild"
   },
   "dependencies": {
-    "@coinbase/wallet-sdk": "3.9.1",
     "@walletconnect/ethereum-provider": "2.13.0",
     "@web3modal/polyfills": "4.2.2",
     "@web3modal/scaffold": "4.2.2",
@@ -62,7 +62,8 @@
   "devDependencies": {
     "react": "18.2.0",
     "react-dom": "18.2.0",
-    "vue": "3.4.3"
+    "vue": "3.4.3",
+    "unbuild": "^3.0.0-rc.1"
   },
   "peerDependenciesMeta": {
     "react": {
