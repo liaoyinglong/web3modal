@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 import { defineBuildConfig } from 'unbuild'
+import fs from 'fs'
 
 export default defineBuildConfig({
   // If entries is not provided, will be automatically inferred from package.json
@@ -19,6 +20,23 @@ export default defineBuildConfig({
   rollup: {
     resolve: {
       browser: true
+    }
+  },
+  hooks: {
+    'mkdist:done'(ctx) {
+      function getCurrentCommitHash() {
+        try {
+          const { execSync } = require('child_process')
+          return execSync('git rev-parse HEAD').toString().trim()
+        } catch (error) {
+          console.error('Error getting current commit hash:', error)
+          return 'Unknown'
+        }
+      }
+      const currentCommitHash = `\
+hash: ${getCurrentCommitHash()} 
+time: ${new Date().toISOString()}`
+      fs.writeFileSync('./build/commit-hash.txt', currentCommitHash)
     }
   }
 })
