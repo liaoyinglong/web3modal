@@ -1,4 +1,4 @@
-export { aD as createWeb3Modal, aE as defaultConfig } from '../shared/ethers.Dw5TVCvW.mjs';
+export { u as createWeb3Modal, v as defaultConfig } from '../shared/ethers.CErmyT4v.mjs';
 import 'valtio/vanilla/utils';
 import 'valtio/vanilla';
 import 'dayjs';
@@ -7,7 +7,6 @@ import 'dayjs/plugin/relativeTime.js';
 import 'dayjs/plugin/updateLocale.js';
 import 'bignumber.js';
 import 'valtio/utils';
-import 'dijkstrajs';
 import 'buffer';
 import 'zod';
 import 'events';
