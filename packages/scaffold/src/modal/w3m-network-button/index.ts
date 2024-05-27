@@ -5,7 +5,7 @@ import {
   ModalController,
   NetworkController
 } from '@web3modal/core'
-import type { WuiNetworkButton } from '@web3modal/ui'
+import type { WuiNetworkButton } from '@web3modal/ui/ui'
 import { customElement } from '@web3modal/ui'
 import { LitElement, html } from 'lit'
 import { property, state } from 'lit/decorators.js'

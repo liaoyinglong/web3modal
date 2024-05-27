@@ -8,6 +8,16 @@
     "dist",
     "!tsconfig.tsbuildinfo"
   ],
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/esm/ui.js",
+      "types": "./dist/types/ui.d.ts"
+    }
+  },
   "scripts": {
     "build:clean": "rm -rf dist",
     "build:ui": "tsc --build",

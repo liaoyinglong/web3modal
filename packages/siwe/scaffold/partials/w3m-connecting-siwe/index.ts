@@ -16,9 +16,11 @@ export class W3mConnectingSiwe extends LitElement {
     const visuals = this.shadowRoot?.querySelectorAll('wui-visual-thumbnail')
 
     if (visuals?.[0]) {
+      // @ts-expect-error 忽略
       this.createAnimation(visuals[0], 'translate(18px)')
     }
     if (visuals?.[1]) {
+      // @ts-expect-error 忽略
       this.createAnimation(visuals[1], 'translate(-18px)')
     }
   }

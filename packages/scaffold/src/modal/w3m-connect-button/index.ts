@@ -1,5 +1,5 @@
 import { ModalController } from '@web3modal/core'
-import type { WuiConnectButton } from '@web3modal/ui'
+import type { WuiConnectButton } from '@web3modal/ui/ui'
 import { customElement } from '@web3modal/ui'
 import { LitElement, html } from 'lit'
 import { property, state } from 'lit/decorators.js'
