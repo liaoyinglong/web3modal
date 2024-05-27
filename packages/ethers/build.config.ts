@@ -13,7 +13,13 @@ export default defineBuildConfig({
   // Generates .d.ts declaration file
   declaration: false,
   failOnWarn: false,
-  externals: [...require('./externals.json'), ...require('./externals-web3modal.json')],
+  externals: [
+    // 这个构建出来有 bug 因为添加 __proto__，多个 __proto__ 在运行时会报错
+    'multiformats',
+
+    ...require('./externals.json'),
+    ...require('./externals-web3modal.json')
+  ],
   replace: {
     'typeof window': JSON.stringify('object')
   },
@@ -24,19 +30,14 @@ export default defineBuildConfig({
   },
   hooks: {
     'mkdist:done'(ctx) {
-      function getCurrentCommitHash() {
-        try {
-          const { execSync } = require('child_process')
-          return execSync('git rev-parse HEAD').toString().trim()
-        } catch (error) {
-          console.error('Error getting current commit hash:', error)
-          return 'Unknown'
-        }
-      }
+      const { execSync } = require('child_process')
+      const pkg = require('./package.json')
       const currentCommitHash = `\
-hash: ${getCurrentCommitHash()} 
-time: ${new Date().toISOString()}`
-      fs.writeFileSync('./build/commit-hash.txt', currentCommitHash)
+hash    : ${execSync('git rev-parse HEAD').toString().trim()} 
+time    : ${new Date().toISOString()}
+name    : ${pkg.name}
+version : ${pkg.version}`
+      fs.writeFileSync('./build/commit-hash.md', currentCommitHash)
     }
   }
 })
