@@ -1,4 +1,4 @@
-export { u as createWeb3Modal, v as defaultConfig } from '../shared/ethers.CErmyT4v.mjs';
+export { u as createWeb3Modal, v as defaultConfig } from '../shared/ethers.TVj614vC.mjs';
 import 'valtio/vanilla/utils';
 import 'valtio/vanilla';
 import 'dayjs';
@@ -13,6 +13,7 @@ import 'events';
 import 'detect-browser';
 import 'query-string';
 import 'crypto';
+import 'multiformats/basics';
 import 'unstorage';
 import 'idb-keyval';
 import 'pino';
