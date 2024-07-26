@@ -44,7 +44,7 @@ export const EthersHelpersUtil = {
   },
   async addEthereumChain(provider: Provider, chain: Chain) {
     // @ts-expect-error truest wallet 特殊处理
-    const isTruestWallet = EIP6963Provider.isTrust || EIP6963Provider.isTrustWallet
+    const isTruestWallet = provider.isTrust || provider.isTrustWallet
 
     await provider.request({
       method: 'wallet_addEthereumChain',
