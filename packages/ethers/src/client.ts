@@ -579,7 +579,8 @@ export class Web3Modal extends Web3ModalScaffold {
     EthersStoreUtil.reset()
 
     if (providerType === 'injected' || providerType === 'eip6963') {
-      provider?.emit('disconnect')
+      // truest wallet don't have emit function
+      typeof provider?.emit === 'function' && provider?.emit('disconnect')
     } else {
       const walletConnectProvider = provider as unknown as EthereumProvider
       if (walletConnectProvider) {
