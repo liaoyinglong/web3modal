@@ -43,6 +43,9 @@ export const EthersHelpersUtil = {
     return address
   },
   async addEthereumChain(provider: Provider, chain: Chain) {
+    // @ts-expect-error truest wallet 特殊处理
+    const isTruestWallet = EIP6963Provider.isTrust || EIP6963Provider.isTrustWallet
+
     await provider.request({
       method: 'wallet_addEthereumChain',
       params: [
@@ -56,7 +59,12 @@ export const EthersHelpersUtil = {
             symbol: chain.currency
           },
           blockExplorerUrls: [chain.explorerUrl],
-          iconUrls: [PresetsUtil.EIP155NetworkImageIds[chain.chainId]]
+          // truest wallet 不支持 iconUrls 或者 iconUrls = [null]
+          ...(isTruestWallet
+            ? {}
+            : {
+                iconUrls: [PresetsUtil.EIP155NetworkImageIds[chain.chainId]]
+              })
         }
       ]
     })
