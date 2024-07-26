@@ -1,4 +1,4 @@
-export { u as createWeb3Modal, v as defaultConfig } from '../shared/ethers.TVj614vC.mjs';
+export { u as createWeb3Modal, v as defaultConfig } from '../shared/ethers._nz2siuU.mjs';
 import 'valtio/vanilla/utils';
 import 'valtio/vanilla';
 import 'dayjs';

@@ -21832,6 +21832,7 @@ const EthersHelpersUtil = {
     return address;
   },
   async addEthereumChain(provider, chain) {
+    const isTruestWallet = provider.isTrust || provider.isTrustWallet;
     await provider.request({
       method: "wallet_addEthereumChain",
       params: [
@@ -21845,7 +21846,9 @@ const EthersHelpersUtil = {
             symbol: chain.currency
           },
           blockExplorerUrls: [chain.explorerUrl],
-          iconUrls: [PresetsUtil.EIP155NetworkImageIds[chain.chainId]]
+          ...isTruestWallet ? {} : {
+            iconUrls: [PresetsUtil.EIP155NetworkImageIds[chain.chainId]]
+          }
         }
       ]
     });
@@ -22284,7 +22287,7 @@ class Web3Modal extends Web3ModalScaffold {
     localStorage.removeItem(EthersConstantsUtil.WALLET_ID);
     EthersStoreUtil.reset();
     if (providerType === "injected" || providerType === "eip6963") {
-      provider?.emit("disconnect");
+      typeof provider?.emit === "function" && provider?.emit("disconnect");
     } else {
       const walletConnectProvider = provider;
       if (walletConnectProvider) {
@@ -22868,7 +22871,14 @@ class Web3Modal extends Web3ModalScaffold {
             });
             EthersStoreUtil.setChainId(chain.chainId);
           } catch (switchError) {
-            if (switchError.code === EthersConstantsUtil.ERROR_CODE_UNRECOGNIZED_CHAIN_ID || switchError.code === EthersConstantsUtil.ERROR_CODE_DEFAULT || switchError?.data?.originalError?.code === EthersConstantsUtil.ERROR_CODE_UNRECOGNIZED_CHAIN_ID) {
+            let shouldTryAddChain = switchError.code === EthersConstantsUtil.ERROR_CODE_UNRECOGNIZED_CHAIN_ID || switchError.code === EthersConstantsUtil.ERROR_CODE_DEFAULT || switchError?.data?.originalError?.code === EthersConstantsUtil.ERROR_CODE_UNRECOGNIZED_CHAIN_ID;
+            {
+              const isTruestWallet = EIP6963Provider.isTrust || EIP6963Provider.isTrustWallet;
+              if (isTruestWallet && switchError.code === 4200) {
+                shouldTryAddChain = true;
+              }
+            }
+            if (shouldTryAddChain) {
               await EthersHelpersUtil.addEthereumChain(EIP6963Provider, chain);
             } else {
               throw new Error("Chain is not supported");
