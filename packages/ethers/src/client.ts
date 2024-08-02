@@ -1280,18 +1280,18 @@ export class Web3Modal extends Web3ModalScaffold {
               switchError.code === EthersConstantsUtil.ERROR_CODE_DEFAULT ||
               switchError?.data?.originalError?.code ===
                 EthersConstantsUtil.ERROR_CODE_UNRECOGNIZED_CHAIN_ID
-                {
-                  // @ts-expect-error truest wallet 特殊处理
-                  const isTruestWallet = EIP6963Provider.isTrust || EIP6963Provider.isTrustWallet
-                  if (isTruestWallet && switchError.code === 4200) {
-                    shouldTryAddChain = true
-                  }
-                }
-                if (shouldTryAddChain) {
-                  await EthersHelpersUtil.addEthereumChain(EIP6963Provider, chain)
-                } else {
-                  throw new Error('Chain is not supported')
-                }
+            {
+              // @ts-expect-error truest wallet 特殊处理
+              const isTruestWallet = EIP6963Provider.isTrust || EIP6963Provider.isTrustWallet
+              if (isTruestWallet && switchError.code === 4200) {
+                shouldTryAddChain = true
+              }
+            }
+            if (shouldTryAddChain) {
+              await EthersHelpersUtil.addEthereumChain(EIP6963Provider, chain)
+            } else {
+              throw new Error('Chain is not supported')
+            }
           }
         }
       } else if (providerType === ConstantsUtil.COINBASE_CONNECTOR_ID && chain) {
