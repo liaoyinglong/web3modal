@@ -11,6 +11,15 @@ export class W3mWalletLoginList extends LitElement {
     return html`
       <wui-flex flexDirection="column" gap="xs">
         <w3m-connect-walletconnect-widget></w3m-connect-walletconnect-widget>
+        <w3m-connect-injected-widget></w3m-connect-injected-widget>
+        <w3m-connect-announced-widget></w3m-connect-announced-widget>
+        <w3m-connect-featured-widget></w3m-connect-featured-widget>
+      </wui-flex>
+    `
+    //@ts-ignore back up
+    return html`
+      <wui-flex flexDirection="column" gap="xs">
+        <w3m-connect-walletconnect-widget></w3m-connect-walletconnect-widget>
         <w3m-connect-recent-widget></w3m-connect-recent-widget>
         <w3m-connect-announced-widget></w3m-connect-announced-widget>
         <w3m-connect-injected-widget></w3m-connect-injected-widget>
