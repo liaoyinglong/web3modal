@@ -1,4 +1,4 @@
-import { O as OptionsController, i, s, S as StorageUtil, x, c as customElement, r, M as ModalController, E as EventsController, A as AccountController, W as W3mFrameRpcConstants, a as SnackController, C as ConnectionController, R as RouterController } from '../shared/ethers._nz2siuU.mjs';
+import { O as OptionsController, i, s, S as StorageUtil, x, c as customElement, r, M as ModalController, E as EventsController, A as AccountController, W as W3mFrameRpcConstants, a as SnackController, C as ConnectionController, R as RouterController } from '../shared/ethers.tuRdtfQc.mjs';
 import 'bignumber.js';
 import 'detect-browser';
 import 'query-string';

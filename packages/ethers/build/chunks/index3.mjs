@@ -1,5 +1,5 @@
 import { n as ne$1, s as se$1, T as T$2, o as oe$1, R as R$1, a as a$2, t as te$1, p as p$1, y as y$1 } from './index2.mjs';
-import { b as b$1 } from '../shared/ethers._nz2siuU.mjs';
+import { b as b$1 } from '../shared/ethers.tuRdtfQc.mjs';
 import { animate } from 'motion';
 import { b as browser } from '../shared/ethers.By60TXoV.mjs';
 import 'valtio/vanilla';

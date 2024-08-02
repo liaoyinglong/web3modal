@@ -7000,7 +7000,7 @@ let W3mConnectView = class W3mConnectView2 extends s$2 {
             <w3m-connect-announced-widget></w3m-connect-announced-widget>
             <w3m-connect-injected-widget></w3m-connect-injected-widget>
             <w3m-connect-custom-widget></w3m-connect-custom-widget>
-            //<w3m-connect-recommended-widget></w3m-connect-recommended-widget>
+            <w3m-connect-recommended-widget></w3m-connect-recommended-widget>
             <wui-flex class="all-wallets" .margin=${["xs", "0", "0", "0"]}>
               <w3m-all-wallets-widget></w3m-all-wallets-widget>
             </wui-flex>
@@ -16019,13 +16019,9 @@ let W3mWalletLoginList = class W3mWalletLoginList2 extends s$2 {
     return x$2`
       <wui-flex flexDirection="column" gap="xs">
         <w3m-connect-walletconnect-widget></w3m-connect-walletconnect-widget>
-        <w3m-connect-recent-widget></w3m-connect-recent-widget>
-        <w3m-connect-announced-widget></w3m-connect-announced-widget>
         <w3m-connect-injected-widget></w3m-connect-injected-widget>
-        <w3m-connect-custom-widget></w3m-connect-custom-widget>
-        <w3m-connect-recommended-widget></w3m-connect-recommended-widget>
-        <w3m-connect-external-widget></w3m-connect-external-widget>
-        <w3m-all-wallets-widget></w3m-all-wallets-widget>
+        <w3m-connect-announced-widget></w3m-connect-announced-widget>
+        <w3m-connect-featured-widget></w3m-connect-featured-widget>
       </wui-flex>
     `;
   }
