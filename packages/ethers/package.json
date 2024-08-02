@@ -37,10 +37,11 @@
   },
   "scripts": {
     "build:clean": "rm -rf dist",
-    "build": "tsc --build",
+    "build": "tsc --build && unbuild",
     "watch": "tsc --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "unbuild": "unbuild"
   },
   "dependencies": {
     "@coinbase/wallet-sdk": "4.0.3",
@@ -63,6 +64,8 @@
     "vue": ">=3"
   },
   "devDependencies": {
+    "@types/node": "^22.0.2",
+    "unbuild": "^3.0.0-rc.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "vue": "3.4.3"
