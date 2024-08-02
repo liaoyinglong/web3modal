@@ -48,6 +48,8 @@ export const EthersHelpersUtil = {
     return addresses
   },
   async addEthereumChain(provider: Provider, chain: Chain) {
+    const icon = PresetsUtil.EIP155NetworkImageIds[chain.chainId]
+
     await provider.request({
       method: 'wallet_addEthereumChain',
       params: [
@@ -61,7 +63,7 @@ export const EthersHelpersUtil = {
             symbol: chain.currency
           },
           blockExplorerUrls: [chain.explorerUrl],
-          iconUrls: [PresetsUtil.EIP155NetworkImageIds[chain.chainId]]
+          iconUrls: icon ? [icon] : []
         }
       ]
     })

@@ -29,6 +29,13 @@ export class W3mConnectView extends LitElement {
   public override render() {
     return html`
       <wui-flex flexDirection="column" .padding=${['3xs', 's', 's', 's']}>
+        ${this.walletListTemplate()}
+      </wui-flex>
+      <w3m-legal-footer></w3m-legal-footer>
+    `
+    //@ts-ignore backup
+    return html`
+      <wui-flex flexDirection="column" .padding=${['3xs', 's', 's', 's']}>
         <w3m-email-login-widget></w3m-email-login-widget>
         <w3m-social-login-widget></w3m-social-login-widget>
         ${this.walletListTemplate()}
