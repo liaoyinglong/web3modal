@@ -27235,6 +27235,7 @@ let W3mConnectorList = class W3mConnectorList2 extends s$2 {
     return x$1`
       <wui-flex flexDirection="column" gap="xs">
         <w3m-connect-walletconnect-widget></w3m-connect-walletconnect-widget>
+        ${recent.length ? x$1`<w3m-connect-recent-widget></w3m-connect-recent-widget>` : null}
         ${announced.length ? x$1`<w3m-connect-announced-widget></w3m-connect-announced-widget>` : null}
         ${injected.length ? x$1`<w3m-connect-injected-widget></w3m-connect-injected-widget>` : null}
         ${featured.length ? x$1`<w3m-connect-featured-widget></w3m-connect-featured-widget>` : null}

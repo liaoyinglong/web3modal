@@ -1,4 +1,4 @@
-export { aI as createWeb3Modal, aJ as defaultConfig } from '../shared/ethers.BeQUjUAB.mjs';
+export { aI as createWeb3Modal, aJ as defaultConfig } from '../shared/ethers.C7TYMlFg.mjs';
 import 'valtio/vanilla/utils';
 import 'valtio/vanilla';
 import 'dayjs';
